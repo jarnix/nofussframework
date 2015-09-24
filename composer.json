@@ -1,0 +1,17 @@
+{
+    "name": "nofussframework/nofussframework",
+    "description": "NoFussFramework",
+    "type": "library",
+    "keywords": [
+        "framework",
+        "nofussframework"
+    ],
+    "homepage": "http://www.nofussframework.com/",
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": ">=5.4"
+    },
+    "bin": [
+        
+    ]
+}
