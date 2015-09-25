@@ -1,5 +1,6 @@
 {
     "name": "nofussframework/nofussframework",
+    "version" : "1.2.2",
     "description": "NoFussFramework",
     "type": "library",
     "keywords": [
