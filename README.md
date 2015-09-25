@@ -6,6 +6,11 @@ Read the whole documentation on http://www.nofussframework.com.
 
 ![logo](http://www.nofussframework.com/assets/img/logo5.png "This logo is terrible")
 
+New in 1.2.3:
+- composer support, finally
+- moved to a different repo
+- created another one for the "empty" website/bootstrap project
+
 New in 1.2.2:
 - upsert (insert on duplicate key update obviously)
 - easy multithreading (in cli obviously)
