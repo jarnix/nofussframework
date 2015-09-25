@@ -6,6 +6,9 @@ Read the whole documentation on http://www.nofussframework.com.
 
 ![logo](http://www.nofussframework.com/assets/img/logo5.png "This logo is terrible")
 
+1.2.3: 
+- bugfixes mainly
+
 New in 1.2.2:
 - upsert (insert on duplicate key update obviously)
 - easy multithreading (in cli obviously)
