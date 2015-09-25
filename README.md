@@ -1,4 +1,4 @@
-No Fuss Framework is a framework designed for PHP 5.4+. It's meant to be fast,simple, and scalable.
+No Fuss Framework is a framework designed for PHP 5.4+. It's meant to be fast, easy to learn, and scalable.
 
 It's a professional framework for building small or large projects.
 
