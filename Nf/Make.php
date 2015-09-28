@@ -26,6 +26,7 @@ class Make
         // get the actual folder of Nf in the app's settings
         $includedFiles = get_included_files();
         $folder = null;
+        
         foreach ($includedFiles as $includedFile) {
             if (preg_match('%Nf\/Autoloader\.php$%', $includedFile, $regs)) {
                 $folder = str_replace('/Autoloader.php', '', $includedFile);
@@ -60,8 +61,9 @@ class Make
                 break;
             }
         }
+        
         if ($folder === null) {
-            throw new \Exception('Cannot find the root folder of Nf');
+            die('The cache already exists, remove the generated files before in /cache (nf.all.php and routes.all.php)' . PHP_EOL);
         }
     }
 
