@@ -12,10 +12,9 @@ class Make
      *            php index.php -m "\App\Mymake\Compressor::compress?type=js", type=js will be accessible with a
      *            $front = \Nf\Front::getInstance();
      *            $params = $front->getRequest()->getParams();
-     *
+     *            
      */
-
-
+    
     // merge all the framework files to a single php file, merge all the routes to /cache/allroutes.php
     public static function compress($action = '')
     {
@@ -24,34 +23,48 @@ class Make
         if (is_file($destFile)) {
             unlink($destFile);
         }
-        $folder = Registry::get('libraryPath') . '/php/classes/Nf/';
-        $allFiles = self::getAllFiles($folder);
-        // sort by depth for include
-        uasort($allFiles, array('self', 'orderFilesByDepth'));
-        $bigInclude = '<?' . 'php' . "\n";
-        foreach ($allFiles as $file) {
-            if (substr($file, - 4) == '.php') {
-                $bigInclude .= "\n" . str_replace('<?' . 'php', '', file_get_contents($file));
+        // get the actual folder of Nf in the app's settings
+        $includedFiles = get_included_files();
+        $folder = null;
+        foreach ($includedFiles as $includedFile) {
+            if (preg_match('%Nf\/Autoloader\.php$%', $includedFile, $regs)) {
+                $folder = str_replace('/Autoloader.php', '', $includedFile);
+                $allFiles = self::getAllFiles($folder);
+                // sort by depth for include
+                uasort($allFiles, array(
+                    'self',
+                    'orderFilesByDepth'
+                ));
+                $bigInclude = '<?' . 'php' . "\n";
+                foreach ($allFiles as $file) {
+                    if (substr($file, - 4) == '.php') {
+                        $bigInclude .= "\n" . str_replace('<?' . 'php', '', file_get_contents($file));
+                    }
+                }
+                file_put_contents($destFile, $bigInclude);
+                
+                // merge routes files
+                $destRoutesFile = Registry::get('applicationPath') . '/cache/routes.all.php';
+                if (is_file($destRoutesFile)) {
+                    unlink($destRoutesFile);
+                }
+                $router = \Nf\Router::getInstance();
+                $router->setRootRoutes();
+                $router->setRoutesFromFiles();
+                $router->addAllRoutes();
+                $allRoutes = $router->getAllRoutes();
+                $bigInclude = '<?' . 'php' . "\n return ";
+                $bigInclude .= var_export($allRoutes, true);
+                $bigInclude .= ";";
+                file_put_contents($destRoutesFile, $bigInclude);
+                break;
             }
         }
-        file_put_contents($destFile, $bigInclude);
-        
-        // merge routes files
-        $destRoutesFile = Registry::get('applicationPath') . '/cache/routes.all.php';
-        if (is_file($destRoutesFile)) {
-            unlink($destRoutesFile);
+        if ($folder === null) {
+            throw new \Exception('Cannot find the root folder of Nf');
         }
-        $router = \Nf\Router::getInstance();
-        $router->setRootRoutes();
-        $router->setRoutesFromFiles();
-        $router->addAllRoutes();
-        $allRoutes = $router->getAllRoutes();
-        $bigInclude = '<?' . 'php' . "\n return ";
-        $bigInclude .= var_export($allRoutes, true);
-        $bigInclude .= ";";
-        file_put_contents($destRoutesFile, $bigInclude);
     }
-    
+
     private static function getAllFiles($folder)
     {
         $folder = rtrim($folder, '/');
@@ -70,6 +83,7 @@ class Make
         }
         return $result;
     }
+
     private static function orderFilesByDepth($file1, $file2)
     {
         $t = (substr_count($file1, '/') > substr_count($file2, '/'));
