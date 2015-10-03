@@ -16,7 +16,6 @@ class Smarty extends View
 
     protected function __construct()
     {
-        require_once \Nf\Registry::get('libraryPath') . '/php/classes/Smarty/Smarty.class.php';
         $this->_smarty = new \Smarty();
         $front = \Nf\Front::getInstance();
         $this->setBasePath($front->getModuleName());
