@@ -93,7 +93,7 @@ class Autoloader
     {
         if (! class_exists($class_name)) {
             if (file_exists($file)) {
-                require $file;
+                require_once $file;
                 return true;
             } else {
                 return false;
