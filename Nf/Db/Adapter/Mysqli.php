@@ -164,10 +164,18 @@ class Mysqli extends AbstractAdapter
             $updateFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);
         }
         $sql .= " " . implode(', ', $updateFields);
-        if ($where != '') {
-            $sql .= " WHERE " . $where;
+        if(!is_array($where)) {
+            if ($where != '') {
+                $sql .= " WHERE " . $where;
+            }    
         }
-        
+        else {
+            $whereFields = array();
+            foreach ($where as $key => $value) {
+                $whereFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);
+            }
+            $sql .= " WHERE " . implode(', ', $whereFields);
+        }
         $res = new $this->_resourceClass($sql, $this);
         $res->execute();
         
