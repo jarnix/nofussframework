@@ -133,7 +133,7 @@ class Http extends AbstractRequest
                 $requestPage = mb_substr($requestPage, 0, mb_strpos($requestPage, '?'));
             }
             
-            if (isset($config->trailingSlash->needed) && $config->trailingSlash->needed==true) {
+            if (isset($config->trailingSlash->needed) && $config->trailingSlash->needed == true) {
                 if (mb_substr($requestPage, - 1, 1) != '/') {
                     $redirectionUrl = 'http://' . $_SERVER['HTTP_HOST'] . $requestPage . '/' . $requestParams;
                 }

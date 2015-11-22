@@ -12,9 +12,9 @@ use Nf\Localization;
 class Bootstrap
 {
 
-    const DEFAULT_LOCALESELECTIONORDER = 'cookie,url,browser';
+    const DEFAULT_LOCALESELECTIONORDER = 'cookie,domain,browser';
 
-    private $_localeAndVersionFromUrlCache = null;
+    private $_localeAndVersionFromDomainCache = null;
 
     private $_applicationNamespace = 'App';
 
@@ -29,71 +29,66 @@ class Bootstrap
         $urlIni = Ini::parse(Registry::get('applicationPath') . '/configs/url.ini', true);
         Registry::set('urlIni', $urlIni);
         
-        // environment : dev, test, prod
-        // si il est défini en variable d'environnement
-        if (empty($inEnvironment)) {
-            if (getenv('environment') != '') {
-                $environment = getenv('environment');
-            } else {
-                // sinon on lit le fichier url.ini
-                if (! empty($_SERVER['HTTP_HOST'])) {
-                    if (preg_match($urlIni->environments->dev->regexp, $_SERVER['HTTP_HOST'])) {
-                        $environment = 'dev';
-                    } elseif (preg_match($urlIni->environments->test->regexp, $_SERVER['HTTP_HOST'])) {
-                        $environment = 'test';
-                    } else {
-                        $environment = 'prod';
-                    }
-                } else {
-                    trigger_error('Cannot guess the requested environment');
-                }
-            }
-        } else {
-            // aucune vérification pour le moment
+        // environment: dev, test, or prod
+        if (! empty($inEnvironment)) {
             $environment = $inEnvironment;
+        } else {
+            // by default
+            $environment = $urlIni->defaults->environment;
+            
+            if (! empty($_SERVER['HTTP_HOST'])) {
+                // let's check the environment from the http host (and set the other values)
+                list ($localeFromDomain, $versionFromDomain, $environmentFromDomain) = $this->getLocaleAndVersionAndEnvironmentFromDomain($_SERVER['HTTP_HOST'], $urlIni);
+                $environment = $environmentFromDomain;
+            }
         }
         
-        // locale
-        if (! empty($urlIni->i18n->$environment->localeSelectionOrder)) {
-            $localeSelectionOrder = $urlIni->i18n->$environment->localeSelectionOrder;
+        if (! empty($inLocale)) {
+            $locale = $inLocale;
         } else {
-            $localeSelectionOrder = self::DEFAULT_LOCALESELECTIONORDER;
-        }
-        $localeSelectionOrderArray = (array) explode(',', $localeSelectionOrder);
-        // 3 possibilities : suivant l'url ou suivant un cookie ou suivant la langue du navigateur (fonctionnement indiqué dans i18n de url.ini)
-        if (empty($inLocale)) {
+            // locale selection order
+            if (! empty($urlIni->localeSelectionOrder->$environment)) {
+                $localeSelectionOrder = $urlIni->localeSelectionOrder->$environment;
+            } else {
+                $localeSelectionOrder = self::DEFAULT_LOCALESELECTIONORDER;
+            }
+            $localeSelectionOrderArray = (array) explode(',', $localeSelectionOrder);
+            // 3 possibilities : according to the url, or by a cookie, or by the browser's accept language
+            
             $locale = null;
             foreach ($localeSelectionOrderArray as $localeSelectionMethod) {
-                if ($locale === null) {
+                if (! in_array($localeSelectionMethod, array(
+                    'browser',
+                    'domain',
+                    'cookie'
+                ))) {
+                    throw new \Exception('The locale selection method must be chosen from these values: browser and/or domain and/or cookie');
+                }
+                if (empty($locale)) {
                     switch ($localeSelectionMethod) {
                         case 'browser':
-                            // on utilise la locale du navigateur et on voit si on a une correspondance
+                            // we use the locale of the browser if requested to
                             if (! empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
                                 // vérification de la syntaxe par une regexp
                                 if (preg_match('/[a-z]+[_\-]?[a-z]+[_\-]?[a-z]+/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches)) {
                                     $locale = Localization::normalizeLocale($matches[0]);
-                                    if (! empty($_SERVER['HTTP_HOST'])) {
-                                        $httpHost = strtolower($_SERVER['HTTP_HOST']);
-                                        list ($localeFromUrl, $versionFromUrl, $redirectToHost) = $this->getLocaleAndVersionFromUrl($httpHost, $urlIni);
-                                    }
                                 }
                             }
                             break;
-                        case 'url':
-                            // lire le fichier url.ini pour connaître la locale à utiliser
-                            // en fonction de l'url
+                        case 'domain':
+                            // we will read the url.ini to guess the requested locale
+                            // according to the domain name
                             if (! empty($_SERVER['HTTP_HOST'])) {
-                                $httpHost = strtolower($_SERVER['HTTP_HOST']);
-                                list ($localeFromUrl, $versionFromUrl, $redirectToHost) = $this->getLocaleAndVersionFromUrl($httpHost, $urlIni);
-                                if (! empty($localeFromUrl)) {
-                                    $locale = $localeFromUrl;
+                                list ($localeFromDomain, $versionFromDomain, $environmentFromDomain) = $this->getLocaleAndVersionAndEnvironmentFromDomain($_SERVER['HTTP_HOST'], $urlIni);
+                                if (! empty($localeFromDomain)) {
+                                    $locale = $localeFromDomain;
                                 }
                             }
                             break;
                         case 'cookie':
-                            // lire le cookie pour connaître la locale à utiliser
+                            // read the cookie to select the locale
                             if (! empty($_COOKIE['_nfLc'])) {
-                                // vérification de la syntaxe par une regexp
+                                // matching of the locale with the cookie's value
                                 if (preg_match('/[a-z]+[_\-]?[a-z]+[_\-]?[a-z]+/i', $_COOKIE['_nfLc'], $matches)) {
                                     $locale = Localization::normalizeLocale($matches[0]);
                                 }
@@ -101,71 +96,39 @@ class Bootstrap
                             break;
                     }
                 }
+                else {
+                    break;
+                }
             }
-        } else {
-            $locale = $inLocale;
-        }
-        
-        // if we did not find the locale, we use the default value
-        if ($locale == null) {
-            if (! empty($urlIni->i18n->defaultLocale)) {
-                $locale = $urlIni->i18n->defaultLocale;
-            } else {
-                throw new \Exception('You have to set a default locale in url.ini');
-            }
-        }
-        // we match the locale with the defined locale
-        $localeFound = false;
-        foreach ($urlIni->locales as $definedLocale => $definedLocaleNames) {
-            if (! $localeFound) {
-                if (strpos($definedLocaleNames, '|')) {
-                    $arrDefinedLocaleNames = explode('|', $definedLocaleNames);
-                    foreach ($arrDefinedLocaleNames as $localeNameOfArr) {
-                        if (trim($localeNameOfArr) == trim($locale)) {
-                            $locale = trim($definedLocale);
-                            $localeFound = true;
-                            break;
-                        }
-                    }
+            
+            // if we did not find the locale with the http host or cookie or browser, let's use the default value
+            if ($locale === null) {
+                if (! empty($urlIni->defaults->locale)) {
+                    $locale = $urlIni->defaults->locale;
                 } else {
-                    if (trim($definedLocaleNames) == trim($locale)) {
-                        $locale = trim($definedLocale);
-                        $localeFound = true;
-                        break;
-                    }
+                    throw new \Exception('Locale not found from browser, cookie or url: you have to set a default locale in url.ini');
                 }
             }
         }
-        
-        // if the detected locale was not found in our defined locales
-        if (! $localeFound) {
-            // reverting to the default locale
-            if (! empty($urlIni->i18n->defaultLocale)) {
-                $locale = $urlIni->i18n->defaultLocale;
-            } else {
-                throw new \Exception('You have to set a default locale in url.ini');
-            }
-        }
-        
+                
         // version (web, mobile, cli...)
         if (empty($inVersion)) {
-            if (! empty($versionFromUrl)) {
-                $version = $versionFromUrl;
+            if (! empty($versionFromDomain)) {
+                $version = $versionFromDomain;
             } else {
                 if (in_array('url', $localeSelectionOrderArray)) {
                     if (! empty($_SERVER['HTTP_HOST'])) {
-                        $httpHost = strtolower($_SERVER['HTTP_HOST']);
-                        list ($localeFromUrl, $versionFromUrl, $redirectToHost) = $this->getLocaleAndVersionFromUrl($httpHost, $urlIni);
+                        list ($localeFromDomain, $versionFromDomain, $environmentFromDomain) = $this->getLocaleAndVersionAndEnvironmentFromDomain($_SERVER['HTTP_HOST'], $urlIni);
                     }
                 }
-                if (! empty($versionFromUrl)) {
-                    $version = $versionFromUrl;
+                if (! empty($versionFromDomain)) {
+                    $version = $versionFromDomain;
                 } else {
-                    // on prend la version par défaut si elle est définie
-                    if (isset($urlIni->i18n->defaultVersion)) {
-                        $version = $urlIni->i18n->defaultVersion;
+                    // let's take the default version then
+                    if (isset($urlIni->defaults->version)) {
+                        $version = $urlIni->defaults->version;
                     } else {
-                        trigger_error('Cannot guess the requested version');
+                        trigger_error('Cannot guess the requested version from the domain name: you have to set a default locale in url.ini');
                     }
                 }
             }
@@ -178,17 +141,11 @@ class Bootstrap
         Registry::set('locale', $locale);
         Registry::set('version', $version);
         
-        // on lit le config.ini à la section concernée par notre environnement
-        $config = Ini::parse(Registry::get('applicationPath') . '/configs/config.ini', true, $locale . '_' . $environment . '_' . $version, 'common');
+        // we use the requested section from the config.ini to load our config
+        $config = Ini::parse(Registry::get('applicationPath') . '/configs/config.ini', true, $locale . '-' . $environment . '-' . $version, 'common');
         Registry::set('config', $config);
         
-        if (! empty($redirectToHost)) {
-            header("HTTP/1.1 301 Moved Permanently");
-            header("Location: http://" . $redirectToHost . $_SERVER['REQUEST_URI']);
-            return false;
-        }
-        
-        // prevention contre l'utilisation de index.php
+        // let's block the use of index.php
         if (isset($_SERVER['REQUEST_URI']) && in_array($_SERVER['REQUEST_URI'], array(
             'index.php',
             '/index.php'
@@ -201,94 +158,38 @@ class Bootstrap
         return true;
     }
 
-    private function getLocaleAndVersionFromUrl($httpHost, $urlIni)
+    private function getLocaleAndVersionAndEnvironmentFromDomain($httpHost, $urlIni)
     {
-        $redirectToHost = null;
+        $httpHost = mb_strtolower($httpHost);
         
-        if (! empty($this->_localeAndVersionFromUrlCache)) {
-            return $this->_localeAndVersionFromUrlCache;
+        if (! empty($this->_localeAndVersionFromDomainCache)) {
+            return $this->_localeAndVersionFromDomainCache;
         } else {
-            $localeFromUrl = '';
-            $versionFromUrl = '';
+            $localeFromDomain = '';
+            $versionFromDomain = '';
+            $environmentFromDomain = '';
             
-            $found = false;
-            
-            foreach ($urlIni->versions as $version_name => $prefix) {
-                if (! $found) {
-                    $redirectToHost = null;
-                    foreach ($urlIni->suffixes as $locale => $suffix) {
-                        if (! $found) {
-                            if ($suffix != '') {
-                                // the hosts names to test
-                                $httpHostsToTest = array();
-                                if ($prefix == '') {
-                                    $httpHostsToTest = array(
-                                        ltrim(str_replace('[version]', '', $suffix), '.')
-                                    );
-                                } else {
-                                    if (strpos($prefix, '|') !== false) {
-                                        $prefixes = array_values(explode('|', $prefix));
-                                        $redirectToHost = ltrim(str_replace('..', '.', ($prefixes[0] == '<>' ? str_replace('[version]', '', $suffix) : str_replace('[version]', $prefixes[0] . '.', $suffix))), '.');
-                                        foreach ($prefixes as $thePrefix) {
-                                            // default empty prefix
-                                            if ($thePrefix == '<>') {
-                                                $httpHostsToTest[] = ltrim(str_replace('..', '.', str_replace('[version]', '', $suffix)), '.');
-                                            } else {
-                                                $httpHostsToTest[] = ltrim(rtrim(str_replace('..', '.', str_replace('[version]', $thePrefix . '.', $suffix)), '.'), '.');
-                                            }
-                                        }
-                                    } else {
-                                        $redirectToHost = null;
-                                        $httpHostsToTest[] = ltrim(rtrim(str_replace('..', '.', str_replace('[version]', str_replace('<>', '', $prefix) . '.', $suffix)), '.'), '.');
-                                    }
-                                }
-                            } else {
-                                if (strpos($prefix, '|') !== false) {
-                                    $prefixes = array_values(explode('|', $prefix));
-                                    foreach ($prefixes as $thePrefix) {
-                                        $httpHostsToTest[] = $thePrefix;
-                                    }
-                                } else {
-                                    $httpHostsToTest[] = $prefix;
-                                }
-                            }
-                            
-                            // le test sur la chaîne reconstruite
-                            foreach ($httpHostsToTest as $httpHostToTest) {
-                                if ($httpHost == $httpHostToTest) {
-                                    $localeFromUrl = $locale;
-                                    
-                                    $versionFromUrl = $version_name;
-                                    if ($locale == '_default') {
-                                        $localeFromUrl = $urlIni->i18n->defaultLocale;
-                                    }
-                                    if ($httpHostToTest == $redirectToHost) {
-                                        $redirectToHost = null;
-                                    }
-                                    $found = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                } else {
+            foreach ($urlIni->regexps as $localeEnvironmentVersion => $regexp) {
+                if (strpos($localeEnvironmentVersion, '-') === false) {
+                    throw new \Exception('You must name the localeEnvironmentVersion strings <locale>-<environment>-<version>');
+                }
+                if (preg_match($regexp, $httpHost)) {
+                    list ($localeFromDomain, $environmentFromDomain, $versionFromDomain) = explode('-', $localeEnvironmentVersion);
                     break;
                 }
-                unset($suffix);
             }
             
-            unset($prefix);
-            $this->_localeAndVersionFromUrlCache = array(
-                $localeFromUrl,
-                $versionFromUrl,
-                $redirectToHost
+            $this->_localeAndVersionFromDomainCache = array(
+                $localeFromDomain,
+                $versionFromDomain,
+                $environmentFromDomain
             );
         }
         
         return array(
-            $localeFromUrl,
-            $versionFromUrl,
-            $redirectToHost
+            $localeFromDomain,
+            $versionFromDomain,
+            $environmentFromDomain
         );
     }
 
@@ -306,8 +207,8 @@ class Bootstrap
             $urlIni = Ini::parse(Registry::get('applicationPath') . '/configs/url.ini', true);
             Registry::set('urlIni', $urlIni);
             
-            $inEnvironment = 'dev';
-            $inLocale = $urlIni->i18n->defaultLocale;
+            $inEnvironment = $urlIni->defaults->environment;
+            $inLocale = $urlIni->defaults->locale;
             $inVersion = 'cli';
             $inAction = array(
                 'type' => 'default',
@@ -361,7 +262,7 @@ class Bootstrap
         
         if (! $showUsage) {
             // on lit le config.ini à la section concernée par notre environnement
-            $config = Ini::parse(Registry::get('applicationPath') . '/configs/config.ini', true, $inLocale . '_' . $inEnvironment . '_' . $inVersion);
+            $config = Ini::parse(Registry::get('applicationPath') . '/configs/config.ini', true, $inLocale . '-' . $inEnvironment . '-' . $inVersion);
             Registry::set('config', $config);
             
             // on assigne les variables d'environnement et de langue en registry
@@ -376,32 +277,6 @@ class Bootstrap
             echo "\nOr : module/controller/action/variable1/value1/variable2/value2/variable3/value3";
             exit(04);
         }
-    }
-
-    function redirectForUserAgent()
-    {
-        if (isset($_SERVER['HTTP_USER_AGENT'])) {
-            $userAgent = new \Nf\UserAgent($_SERVER['HTTP_USER_AGENT']);
-            // check the [redirections] section of the url.ini against the userAgent and redirect if we've been told to
-            $urlIni = Registry::get('urlIni');
-            foreach ($urlIni->redirections as $class => $forcedVersion) {
-                if ($userAgent->checkClass($class)) {
-                    if (! empty($forcedVersion)) {
-                        // get the redirection URL according to the current class
-                        $suffixes = (array) $urlIni->suffixes;
-                        $versions = (array) $urlIni->versions;
-                        if ($forcedVersion != $this->_localeAndVersionFromUrlCache[1]) {
-                            $redirectionUrl = 'http://' . str_replace('[version]', $versions[$forcedVersion], $suffixes[$this->_localeAndVersionFromUrlCache[0]]);
-                            $response = new Front\Response\Http();
-                            $response->redirect($redirectionUrl, 301);
-                            $response->sendHeaders();
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     function go()
@@ -422,7 +297,7 @@ class Bootstrap
             
             $front->setResponse($response);
             $front->setApplicationNamespace($this->_applicationNamespace);
-
+            
             $this->setTimezone();
             
             // routing
@@ -480,81 +355,78 @@ class Bootstrap
             
             Error\Handler::setErrorDisplaying();
             
-            if (! $this->redirectForUserAgent()) {
-                $front = Front::getInstance();
-                $request = new Front\Request\Http();
-                
-                $front->setRequest($request);
-                $response = new Front\Response\Http();
-                $front->setResponse($response);
-                $front->setApplicationNamespace($this->_applicationNamespace);
-                
-                $this->setTimezone();
-                
-                // routing
-                $router = Router::getInstance();
-                $front->setRouter($router);
-                $router->addAllRoutes();
-                
-                // order in finding routes
-                $router->setRoutesFromFiles();
-                $router->setRootRoutes();
-                $router->setStructuredRoutes();
-                
-                // modules directory for this version
-                $front->addModuleDirectory($this->_applicationNamespace, Registry::get('applicationPath') . '/application/' . Registry::get('version') . '/');
-                $front->addModuleDirectory('library', Registry::get('libraryPath') . '/php/application/' . Registry::get('version') . '/');
-                
-                $config = Registry::get('config');
-                if (isset($config->session->handler)) {
-                    $front->setSession(Session::start());
-                }
-                
-                $labelManager = LabelManager::getInstance();
-                $labelManager->loadLabels(Registry::get('locale'));
-                
-                $localization = Localization::getInstance();
-                Localization::setLocale(Registry::get('locale'));
-                
-                $testDispatch = $front->dispatch();
-                
-                $requestIsClean = $request->sanitizeUri();
-                
-                if ($requestIsClean) {
-                    if ($testDispatch === true) {
-                        $request->setPutFromRequest();
-                        
-                        if (! $request->redirectForTrailingSlash()) {
-                            if ($front->init() !== false) {
-                                if (! $front->response->isRedirect()) {
-                                    $front->launchAction();
-                                }
-                                if (! $front->response->isRedirect()) {
-                                    $front->postLaunchAction();
-                                }
+            $front = Front::getInstance();
+            $request = new Front\Request\Http();
+            
+            $front->setRequest($request);
+            $response = new Front\Response\Http();
+            $front->setResponse($response);
+            $front->setApplicationNamespace($this->_applicationNamespace);
+            
+            $this->setTimezone();
+            
+            // routing
+            $router = Router::getInstance();
+            $front->setRouter($router);
+            $router->addAllRoutes();
+            
+            // order in finding routes
+            $router->setRoutesFromFiles();
+            $router->setRootRoutes();
+            $router->setStructuredRoutes();
+            
+            // modules directory for this version
+            $front->addModuleDirectory($this->_applicationNamespace, Registry::get('applicationPath') . '/application/' . Registry::get('version') . '/');
+            $front->addModuleDirectory('library', Registry::get('libraryPath') . '/php/application/' . Registry::get('version') . '/');
+            
+            $config = Registry::get('config');
+            if (isset($config->session->handler)) {
+                $front->setSession(Session::start());
+            }
+            
+            $labelManager = LabelManager::getInstance();
+            $labelManager->loadLabels(Registry::get('locale'));
+            
+            $localization = Localization::getInstance();
+            Localization::setLocale(Registry::get('locale'));
+            
+            $testDispatch = $front->dispatch();
+            
+            $requestIsClean = $request->sanitizeUri();
+            
+            if ($requestIsClean) {
+                if ($testDispatch === true) {
+                    $request->setPutFromRequest();
+                    
+                    if (! $request->redirectForTrailingSlash()) {
+                        if ($front->init() !== false) {
+                            if (! $front->response->isRedirect()) {
+                                $front->launchAction();
+                            }
+                            if (! $front->response->isRedirect()) {
+                                $front->postLaunchAction();
                             }
                         }
-                    } else {
-                        Error\Handler::handleNotFound(404);
                     }
                 } else {
-                    Error\Handler::handleForbidden(403);
+                    Error\Handler::handleNotFound(404);
                 }
-                $response->sendResponse();
+            } else {
+                Error\Handler::handleForbidden(403);
             }
+            $response->sendResponse();
         }
     }
-    
-    private function setTimezone() {
+
+    private function setTimezone()
+    {
         $config = Registry::get('config');
-        if(isset($config->date->timezone)) {
+        if (isset($config->date->timezone)) {
             try {
                 date_default_timezone_set($config->date->timezone);
-            }
-            catch(\Exception $e) {
+            } catch (\Exception $e) {
                 echo 'timezone set failed (' . $config->date->timezone . ') is not a valid timezone';
             }
         }
     }
-    
 }

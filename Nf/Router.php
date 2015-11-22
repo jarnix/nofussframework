@@ -250,10 +250,7 @@ class Router extends Singleton
                         $routeRegexpWithoutNamedParams = preg_replace('/\([\w_]+:/', '(', $route['regexp']);
         
                         $arrRouteModuleControllerAction = explode('/', $route['controller']);
-        
-                        // make the first slash after our route directory optional
-                        $routeTest = rtrim('/' . ltrim($routeRegexpWithoutNamedParams, '/'), '/');
-  
+          
                         // check if this is a match, or else continue until we have a match
                         if (preg_match('#^' . $routeRegexpWithoutNamedParams . '#', $uri, $refs)) {
                             // if using a rest request, the user can override the method
