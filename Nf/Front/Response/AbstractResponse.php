@@ -86,7 +86,7 @@ abstract class AbstractResponse
         return $output;
     }
 
-    public static function log($msg, $color = 'white')
+    public static function writeln($msg, $color = 'white')
     {
         echo static::colorText($msg, $color) . PHP_EOL;
 
