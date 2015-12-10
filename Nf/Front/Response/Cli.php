@@ -61,15 +61,17 @@ class Cli extends AbstractResponse
             'green' => '0;32',
             'bold_green' => '1;32',
             'brown' => '0;33',
-            'yellow' => '1;33',
+            'yellow' => '0;33',
+            'bold_yellow' => '1;33',
             'blue' => '0;34',
             'bold_blue' => '1;34',
             'purple' => '0;35',
             'bold_purple' => '1;35',
             'cyan' => '0;36',
             'bold_cyan' => '1;36',
-            'white' => '1;37',
-            'bold_gray' => '0;37'
+            'white' => '0;37',
+            'bold_gray' => '1;37'
+
         );
         if (isset($colors[$color])) {
             return "\033[" . $colors[$color] . 'm' . $text . "\033[0m";

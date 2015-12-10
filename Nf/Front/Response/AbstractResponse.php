@@ -86,6 +86,12 @@ abstract class AbstractResponse
         return $output;
     }
 
+    public static function writeln($msg, $color = 'white')
+    {
+        echo static::colorText($msg, $color) . PHP_EOL;
+
+    }
+
     protected static function stackTracePrintEntry($entry, $displayArgsType = 1, $alternativeSeparator = false)
     {
         $output = '';
