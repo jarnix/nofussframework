@@ -30,13 +30,7 @@ class Handler extends \Exception
         // Restore the built-in error handler.
         restore_error_handler();
         
-        while (set_exception_handler(create_function('$e', 'return false;'))) {
-            // Unset the error handler we just set.
-            restore_exception_handler();
-            // Unset the previous error handler.
-            restore_exception_handler();
-        }
-        // Restore the built-in error handler.
+        // Restore the built-in exception handler.
         restore_exception_handler();
     }
 
