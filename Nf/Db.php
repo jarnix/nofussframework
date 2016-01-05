@@ -13,6 +13,8 @@ class Db
     const FETCH_COLUMN = 7;
 
     private static $_connections = array();
+    
+    public static $_forceStoreConnectionInInstance = null;
 
     public static function factory($config)
     {
@@ -37,6 +39,10 @@ class Db
         
         if(!isset($config->db->$configName)) {
             throw new \Exception('The adapter "' . $configName . '" is not defined in the config file');
+        }
+        
+        if (self::$_forceStoreConnectionInInstance !== null) {
+            $storeInInstance = self::$_forceStoreConnectionInInstance;
         }
         
         $defaultHostname = $config->db->$configName->params->hostname;
