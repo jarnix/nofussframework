@@ -16,12 +16,12 @@ abstract class Image
         // get the original dimensions
         $width = $image->getImageWidth();
         $height = $image->getImageHeight();
+        $r = $width / $height;
         
         // the image will not be cut and the final dimensions will be within the requested dimensions
         if (! $cut) {
             // width & height : maximums and aspect ratio is maintained
             if ($thumbnailHeight == 0) {
-                $r = $width / $height;
                 $thumbnailHeight = ceil($thumbnailWidth / $r);
                 if (! ($thumbnailWidth == 0 && $thumbnailHeight == 0)) {
                     // create the thumbnail
@@ -30,7 +30,6 @@ abstract class Image
                     throw new \Exception('Cannot create a 0x0 thumbnail');
                 }
             } elseif ($thumbnailWidth == 0) {
-                $r = $width / $height;
                 $thumbnailWidth = ceil($thumbnailHeight * $r);
                 if (! ($thumbnailWidth == 0 && $thumbnailHeight == 0)) {
                     // create thumbnail
@@ -42,7 +41,7 @@ abstract class Image
                 // determine which dimension to fit to
                 $fitWidth = ($thumbnailWidth / $width) < ($thumbnailHeight / $height);
                 // create thumbnail
-                $image->thumbnailImage($fitWidth ? $thumbnailWidth : 0, $fitWidth ? 0 : $thumbnailHeight);
+                $image->thumbnailImage($fitWidth ? $thumbnailWidth : 0, $fitWidth ? 0 : $thumbnailHeight, true, true);
             }
         } else {
             if ($thumbnailWidth == 0 || $thumbnailHeight == 0) {
@@ -50,7 +49,6 @@ abstract class Image
             }
             
             // scale along the smallest side
-            $r = $width / $height;
             if ($r < 1) {
                 $newWidth = $thumbnailWidth;
                 $newHeight = ceil($thumbnailWidth / $r);
@@ -58,8 +56,21 @@ abstract class Image
                 $newWidth = ceil($thumbnailHeight * $r);
                 $newHeight = $thumbnailHeight;
             }
-            
-            $image->thumbnailImage($newWidth, $newHeight);
+           
+            // if the requested thumbnail is too large 
+            if($newWidth < $thumbnailWidth || $newHeight < $thumbnailHeight) {
+                if($newWidth < $thumbnailWidth) {
+                    $newWidth = $thumbnailWidth;
+                    $newHeight = $thumbnailWidth / $r;
+                }
+                if($newHeight < $thumbnailHeight) {
+                    $newHeight = $thumbnailHeight;
+                    $newWidth = $thumbnailWidth * $r;
+                }
+            }
+           
+            $image->resizeImage($newWidth, $newHeight, \Imagick::FILTER_CATROM, 1);
+ 
             $width = $newWidth;
             $height = $newHeight;
             
