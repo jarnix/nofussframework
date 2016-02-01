@@ -110,7 +110,7 @@ abstract class Image
             }
             
             while ($height - $y > $thumbnailHeight) {
-                $sliceHeight = min($sliceLength, $height - $y - $thumbnailHeight);
+                $sliceHeight = min($sliceLength, ceil($height - $y - $thumbnailHeight));
                 $imageCopy1 = $workingImage->getImage();
                 $imageCopy2 = $workingImage->getImage();
                 $imageCopy1->cropImage($width, $sliceHeight, 0, $y);
