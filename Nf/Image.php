@@ -56,21 +56,21 @@ abstract class Image
                 $newWidth = ceil($thumbnailHeight * $r);
                 $newHeight = $thumbnailHeight;
             }
-           
-            // if the requested thumbnail is too large 
-            if($newWidth < $thumbnailWidth || $newHeight < $thumbnailHeight) {
-                if($newWidth < $thumbnailWidth) {
+            
+            // if the requested thumbnail is too large
+            if ($newWidth < $thumbnailWidth || $newHeight < $thumbnailHeight) {
+                if ($newWidth < $thumbnailWidth) {
                     $newWidth = $thumbnailWidth;
-                    $newHeight = $thumbnailWidth / $r;
+                    $newHeight = ceil($thumbnailWidth / $r);
                 }
-                if($newHeight < $thumbnailHeight) {
+                if ($newHeight < $thumbnailHeight) {
                     $newHeight = $thumbnailHeight;
-                    $newWidth = $thumbnailWidth * $r;
+                    $newWidth = ceil($thumbnailWidth * $r);
                 }
             }
-           
+            
             $image->resizeImage($newWidth, $newHeight, \Imagick::FILTER_CATROM, 1);
- 
+            
             $width = $newWidth;
             $height = $newHeight;
             
