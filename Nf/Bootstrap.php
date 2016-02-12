@@ -7,7 +7,7 @@ use Nf\Localization;
  * Bootstrap is responsible for instanciating the application in cli or web environment
  *
  * @package Nf
- *         
+ *
  */
 class Bootstrap
 {
@@ -28,21 +28,23 @@ class Bootstrap
     {
         $urlIni = Ini::parse(Registry::get('applicationPath') . '/configs/url.ini', true);
         Registry::set('urlIni', $urlIni);
-        
+
         // environment: dev, test, or prod
         if (! empty($inEnvironment)) {
             $environment = $inEnvironment;
         } else {
             // by default
             $environment = $urlIni->defaults->environment;
-            
+
             if (! empty($_SERVER['HTTP_HOST'])) {
                 // let's check the environment from the http host (and set the other values)
                 list ($localeFromDomain, $versionFromDomain, $environmentFromDomain) = $this->getLocaleAndVersionAndEnvironmentFromDomain($_SERVER['HTTP_HOST'], $urlIni);
-                $environment = $environmentFromDomain;
+                if(!empty($environmentFromDomain)) {
+                    $environment = $environmentFromDomain;
+                }
             }
         }
-        
+
         if (! empty($inLocale)) {
             $locale = $inLocale;
         } else {
@@ -54,7 +56,7 @@ class Bootstrap
             }
             $localeSelectionOrderArray = (array) explode(',', $localeSelectionOrder);
             // 3 possibilities : according to the url, or by a cookie, or by the browser's accept language
-            
+
             $locale = null;
             foreach ($localeSelectionOrderArray as $localeSelectionMethod) {
                 if (! in_array($localeSelectionMethod, array(
@@ -100,7 +102,7 @@ class Bootstrap
                     break;
                 }
             }
-            
+
             // if we did not find the locale with the http host or cookie or browser, let's use the default value
             if ($locale === null) {
                 if (! empty($urlIni->defaults->locale)) {
@@ -110,7 +112,7 @@ class Bootstrap
                 }
             }
         }
-                
+
         // version (web, mobile, cli...)
         if (empty($inVersion)) {
             if (! empty($versionFromDomain)) {
@@ -135,16 +137,16 @@ class Bootstrap
         } else {
             $version = $inVersion;
         }
-        
+
         // on assigne les variables d'environnement et de language en registry
         Registry::set('environment', $environment);
         Registry::set('locale', $locale);
         Registry::set('version', $version);
-        
+
         // we use the requested section from the config.ini to load our config
         $config = Ini::parse(Registry::get('applicationPath') . '/configs/config.ini', true, $locale . '-' . $environment . '-' . $version, 'common');
         Registry::set('config', $config);
-        
+
         // let's block the use of index.php
         if (isset($_SERVER['REQUEST_URI']) && in_array($_SERVER['REQUEST_URI'], array(
             'index.php',
@@ -154,21 +156,21 @@ class Bootstrap
             header("Location: /");
             return false;
         }
-        
+
         return true;
     }
 
     private function getLocaleAndVersionAndEnvironmentFromDomain($httpHost, $urlIni)
     {
         $httpHost = mb_strtolower($httpHost);
-        
+
         if (! empty($this->_localeAndVersionFromDomainCache)) {
             return $this->_localeAndVersionFromDomainCache;
         } else {
             $localeFromDomain = '';
             $versionFromDomain = '';
             $environmentFromDomain = '';
-            
+
             foreach ($urlIni->regexps as $localeEnvironmentVersion => $regexp) {
                 if (strpos($localeEnvironmentVersion, '-') === false) {
                     throw new \Exception('You must name the localeEnvironmentVersion strings <locale>-<environment>-<version>');
@@ -178,14 +180,14 @@ class Bootstrap
                     break;
                 }
             }
-            
+
             $this->_localeAndVersionFromDomainCache = array(
                 $localeFromDomain,
                 $versionFromDomain,
                 $environmentFromDomain
             );
         }
-        
+
         return array(
             $localeFromDomain,
             $versionFromDomain,
@@ -202,11 +204,11 @@ class Bootstrap
     public function initCliEnvironment()
     {
         $showUsage = true;
-        
+
         if (isset($_SERVER['argv']) && $_SERVER['argc'] >= 2) {
             $urlIni = Ini::parse(Registry::get('applicationPath') . '/configs/url.ini', true);
             Registry::set('urlIni', $urlIni);
-            
+
             $inEnvironment = $urlIni->defaults->environment;
             $inLocale = $urlIni->defaults->locale;
             $inVersion = 'cli';
@@ -214,14 +216,14 @@ class Bootstrap
                 'type' => 'default',
                 'uri' => null
             );
-            
+
             // default values
             Registry::set('environment', $inEnvironment);
             Registry::set('locale', $inLocale);
             Registry::set('version', $inVersion);
-            
+
             $arrParams = array();
-            
+
             $ac = 1;
             while ($ac < (count($_SERVER['argv']))) {
                 switch ($_SERVER['argv'][$ac]) {
@@ -259,17 +261,17 @@ class Bootstrap
                 }
             }
         }
-        
+
         if (! $showUsage) {
             // on lit le config.ini à la section concernée par notre environnement
             $config = Ini::parse(Registry::get('applicationPath') . '/configs/config.ini', true, $inLocale . '-' . $inEnvironment . '-' . $inVersion);
             Registry::set('config', $config);
-            
+
             // on assigne les variables d'environnement et de langue en registry
             Registry::set('environment', $inEnvironment);
             Registry::set('locale', $inLocale);
             Registry::set('version', $inVersion);
-            
+
             return $inAction;
         } else {
             echo "Usage : module/controller/action";
@@ -283,43 +285,43 @@ class Bootstrap
     {
         if (php_sapi_name() == 'cli') {
             $inAction = $this->initCliEnvironment();
-            
+
             $uri = $inAction['uri'];
             Error\Handler::setErrorDisplaying();
             $front = Front::getInstance();
-            
+
             $request = new Front\Request\Cli($uri);
             $front->setRequest($request);
-            
+
             $request->setAdditionalCliParams();
-            
+
             $response = new Front\Response\Cli();
-            
+
             $front->setResponse($response);
             $front->setApplicationNamespace($this->_applicationNamespace);
-            
+
             $this->setTimezone();
-            
+
             // routing
             $router = Router::getInstance();
             $front->setRouter($router);
             $router->addAllRoutes();
-            
+
             // order in finding routes
             $router->setStructuredRoutes();
-            
+
             $front->addModuleDirectory($this->_applicationNamespace, Registry::get('applicationPath') . '/application/cli/');
             $front->addModuleDirectory('library', Registry::get('libraryPath') . '/php/application/cli/');
-            
+
             $labelManager = LabelManager::getInstance();
             $labelManager->loadLabels(Registry::get('locale'));
-            
+
             $localization = Localization::getInstance();
             $localization->setLocale(Registry::get('locale'));
-            
+
             if ($inAction['type'] == 'default') {
                 $testDispatch = $front->dispatch();
-                
+
                 if ($testDispatch) {
                     if ($front->init() !== false) {
                         $front->launchAction();
@@ -332,7 +334,7 @@ class Bootstrap
             } else {
                 $front->parseParameters($inAction['uri']);
                 $className = array();
-                
+
                 // $inAction['uri'] might be a class name with a static method like \Nf\Make::compress
                 if ((strpos($inAction['uri'], '\\') !== false)) {
                     if (strpos($inAction['uri'], '::') === false) {
@@ -352,52 +354,52 @@ class Bootstrap
             }
         } else {
             $this->initHttpEnvironment();
-            
+
             Error\Handler::setErrorDisplaying();
-            
+
             $front = Front::getInstance();
             $request = new Front\Request\Http();
-            
+
             $front->setRequest($request);
             $response = new Front\Response\Http();
             $front->setResponse($response);
             $front->setApplicationNamespace($this->_applicationNamespace);
-            
+
             $this->setTimezone();
-            
+
             // routing
             $router = Router::getInstance();
             $front->setRouter($router);
             $router->addAllRoutes();
-            
+
             // order in finding routes
             $router->setRoutesFromFiles();
             $router->setRootRoutes();
             $router->setStructuredRoutes();
-            
+
             // modules directory for this version
             $front->addModuleDirectory($this->_applicationNamespace, Registry::get('applicationPath') . '/application/' . Registry::get('version') . '/');
             $front->addModuleDirectory('library', Registry::get('libraryPath') . '/php/application/' . Registry::get('version') . '/');
-            
+
             $config = Registry::get('config');
             if (isset($config->session->handler)) {
                 $front->setSession(Session::start());
             }
-            
+
             $labelManager = LabelManager::getInstance();
             $labelManager->loadLabels(Registry::get('locale'));
-            
+
             $localization = Localization::getInstance();
             Localization::setLocale(Registry::get('locale'));
-            
+
             $testDispatch = $front->dispatch();
-            
+
             $requestIsClean = $request->sanitizeUri();
-            
+
             if ($requestIsClean) {
                 if ($testDispatch === true) {
                     $request->setPutFromRequest();
-                    
+
                     if (! $request->redirectForTrailingSlash()) {
                         if ($front->init() !== false) {
                             if (! $front->response->isRedirect()) {
