@@ -4,7 +4,7 @@ namespace Nf;
 abstract class Image
 {
 
-    public static function generateThumbnail($imagePath, $thumbnailPath, $thumbnailWidth = 100, $thumbnailHeight = 100, $cut = false)
+    public static function generateThumbnail($imagePath, $thumbnailPath, $thumbnailWidth = 100, $thumbnailHeight = 100, $cut = false, $border = false)
     {
         
         // load the original image
@@ -41,7 +41,11 @@ abstract class Image
                 // determine which dimension to fit to
                 $fitWidth = ($thumbnailWidth / $width) < ($thumbnailHeight / $height);
                 // create thumbnail
-                $image->thumbnailImage($fitWidth ? $thumbnailWidth : 0, $fitWidth ? 0 : $thumbnailHeight, true, true);
+                $image->thumbnailImage($fitWidth ? $thumbnailWidth : 0, $fitWidth ? 0 : $thumbnailHeight, $border ? false : true, true);
+            }
+
+            if ($border) {
+                $image->borderImage('white', ($thumbnailWidth - $image->getImageWidth()) / 2, ($thumbnailHeight - $image->getImageHeight()) / 2);
             }
         } else {
             if ($thumbnailWidth == 0 || $thumbnailHeight == 0) {
@@ -58,14 +62,14 @@ abstract class Image
             }
             
             // if the requested thumbnail is too large
-            if ($newWidth < $thumbnailWidth || $newHeight < $thumbnailHeight) {
+            if ($newWidth > $thumbnailWidth || $newHeight < $thumbnailHeight) {
                 if ($newWidth < $thumbnailWidth) {
                     $newWidth = $thumbnailWidth;
                     $newHeight = ceil($thumbnailWidth / $r);
                 }
                 if ($newHeight < $thumbnailHeight) {
                     $newHeight = $thumbnailHeight;
-                    $newWidth = ceil($thumbnailWidth * $r);
+                    $newWidth = ceil($thumbnailHeight * $r);
                 }
             }
             
