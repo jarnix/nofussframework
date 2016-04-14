@@ -102,8 +102,16 @@ class Http extends AbstractRequest
         }
         
         if ($jsonDecode == 'assoc') {
-            return json_decode($post, true);
-        } else {
+            $json = json_decode($post, true);
+            parse_str(urldecode($post), $array);
+            if (empty($json) || !is_array($json)) {
+                return !empty($array) && is_array($array) ? $array : [];
+            }
+            else {
+                return $json;
+            }
+        }
+        else {
             return $post;
         }
     }
@@ -111,7 +119,14 @@ class Http extends AbstractRequest
     public function getPut($jsonDecode = 'assoc')
     {
         if ($jsonDecode == 'assoc') {
-            return json_decode($this->_put, true);
+            $json = json_decode($this->_put, true);
+            parse_str(urldecode($this->_put), $array);
+            if (empty($json) || !is_array($json)) {
+                return !empty($array) && is_array($array) ? $array : [];
+            }
+            else {
+                return $json;
+            }
         } else {
             return $this->_put;
         }
