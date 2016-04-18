@@ -19,7 +19,6 @@ class Timer {
     }
 };
 
-
 // We need this to limit the frequency of the progress bar. Or else it
 // hugely slows down the app.
 class FPSLimit {
@@ -56,6 +55,7 @@ class ProgressBar extends Progress {
     private $units;
     private $total;
     private $autoCols = false;
+    private $first = true;
 
     function __construct($total = null, $cols = null){
         if($total != null) {
@@ -69,11 +69,12 @@ class ProgressBar extends Progress {
         }
         // change the fps limit as needed
         $this->limiter = new FPSLimit(10);
-        echo PHP_EOL;
     }
 
     function __destruct(){
-        $this->draw();
+        if(!$this->first) {
+            $this->draw();    
+        }
     }
 
     function updateSize(){
@@ -104,7 +105,13 @@ class ProgressBar extends Progress {
         $this->draw();
     }
     
-    private static function showStatus($done, $total, $size=30, $lineWidth=-1) {
+    private function showStatus($done, $total, $size=30, $lineWidth=-1) {
+        
+        if($this->first) {
+            echo PHP_EOL;
+            $this->first = false;
+        }
+        
         if($lineWidth <= 0){
             $lineWidth = 50;
         }
@@ -142,7 +149,7 @@ class ProgressBar extends Progress {
         $disp=number_format($perc*100, 1);
 
         $status_bar.="]";
-        $details = "$disp% - $done/$total";
+        $details = "$disp% - $done/$total ";
 
         $rate = ($now-$start_time)/$done;
         $left = $total - $done;
@@ -150,7 +157,7 @@ class ProgressBar extends Progress {
 
         $elapsed = $now - $start_time;
 
-        $details .= "\t ETA: " . self::formatTime($eta)."\t TOTAL: ". self::formatTime($elapsed);
+        $details .= " ETA: " . self::formatTime($eta)." TOTAL: ". self::formatTime($elapsed) . "   ";
 
         $lineWidth--;
         if(strlen($details) >= $lineWidth){
