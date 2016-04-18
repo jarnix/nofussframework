@@ -76,6 +76,8 @@ class Cli extends AbstractResponse
         if (isset($colors[$color])) {
             return "\033[" . $colors[$color] . 'm' . $text . "\033[0m";
         }
+
+        return $text;
     }
 
     protected static function escape($str)
