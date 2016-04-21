@@ -42,14 +42,27 @@ abstract class Env
     Gets the value in this order (the last variable overwrites the previous one)
      - .env (at the root directory of the application)
      - server's environment (like SetEnv in .htaccess or SetEnv in apache's virtual host config)
+    This function will return the value of a variable that would not have been defined earlier
     */
-    public static function get($key) {       
+    public static function get($key) {
         $value = getenv($key);
-        if($value===null) {
-            return; 
+        // look for the value in environment (that always overwrites the .env value)
+        if($value!==false) {
+             return $value;
         }
         else {
-            return value;
+            // if we ask for a nested variable (like db.my_site.password)
+            if(strpos($key, '.')) {
+                $explodedKey = explode('.', $key);
+                $value = null;
+                foreach($explodedKey as $k) {
+                    echo $k . '--';
+                }
+            }
+            else {
+                
+            }
+            
         }
     }
     
