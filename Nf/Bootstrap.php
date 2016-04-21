@@ -146,6 +146,13 @@ class Bootstrap
         // we use the requested section from the config.ini to load our config
         $config = Ini::parse(Registry::get('applicationPath') . '/configs/config.ini', true, $locale . '-' . $environment . '-' . $version, 'common');
         Registry::set('config', $config);
+        
+        // parse the variables from the .env file or environment
+        $env = Env::init();
+        Registry::set('env', $env);
+        
+        // merge Env over Config to create the Settings Object
+        // Settings::init();
 
         // let's block the use of index.php
         if (isset($_SERVER['REQUEST_URI']) && in_array($_SERVER['REQUEST_URI'], array(

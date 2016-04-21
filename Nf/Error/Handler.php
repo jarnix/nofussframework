@@ -158,41 +158,44 @@ class Handler extends \Exception
                 }
             }
             
-            if ($response->isBinary()) {
-                $response->setContentType('html');
-            }
-            if ((isset($config->error->clearResponse) && $config->error->clearResponse) || (! isset($config->error->clearResponse))) {
-                $response->clearBody();
-                $response->clearBuffer();
-            }
-            try {
-                $response->setHttpResponseCode($err['httpCode']);
-                $response->sendHeaders();
-            } catch (Exception $e) {}
-            
-            if (isset($config->error->displayMethod)) {
-                if ($config->error->displayMethod == 'forward') {
-                    // forward
-                    if (! $front->forward($config->error->forward->module, $config->error->forward->controller, $config->error->forward->action)) {
-                        echo '** Nf: Cannot instantiate error module, printing error message **' . PHP_EOL . PHP_EOL;
-                        $response->displayError($err);
-                        echo PHP_EOL;
+            if(isset($response)) {
+                if ($response->isBinary()) {
+                    $response->setContentType('html');
+                }
+                if ((isset($config->error->clearResponse) && $config->error->clearResponse) || (! isset($config->error->clearResponse))) {
+                    $response->clearBody();
+                    $response->clearBuffer();
+                }
+                try {
+                    $response->setHttpResponseCode($err['httpCode']);
+                    $response->sendHeaders();
+                } catch (Exception $e) {}
+                
+                if (isset($config->error->displayMethod)) {
+                    if ($config->error->displayMethod == 'forward') {
+                        // forward
+                        if (! $front->forward($config->error->forward->module, $config->error->forward->controller, $config->error->forward->action)) {
+                            echo '** Nf: Cannot instantiate error module, printing error message **' . PHP_EOL . PHP_EOL;
+                            $response->displayError($err);
+                            echo PHP_EOL;
+                        } else {
+                            $response->sendResponse();
+                        }
+                        return true;
                     } else {
-                        $response->sendResponse();
-                    }
-                    return true;
-                } else {
-                    if (method_exists($exception, 'display')) {
-                        $response->setHttpResponseCode($err['httpCode']);
-                        $exception->display();
-                    } else {
-                        // default : display (if xhr, use alternative display)
-                        $response->displayError($err, $front->getRequest()
-                            ->isXhr());
+                        if (method_exists($exception, 'display')) {
+                            $response->setHttpResponseCode($err['httpCode']);
+                            $exception->display();
+                        } else {
+                            // default : display (if xhr, use alternative display)
+                            $response->displayError($err, $front->getRequest()->isXhr());
+                        }
                     }
                 }
             }
-            
+            else {
+                throw new \Exception($exception);
+            }
             return true;
         } else {
             @header('HTTP/1.1 500 Internal Server Error');
