@@ -96,7 +96,6 @@ class Ini
         else {
             return self::$result;
         }
-        
     }
 
     /**

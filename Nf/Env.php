@@ -1,20 +1,24 @@
 <?php
 namespace Nf;
 
-abstract class Env
+class Env extends Singleton
 {
+    use Helper\StoreTrait;
+    
+    protected static $_instance=null;
+    private static $data;
 
     // reads the .env file, merges the environment on top of the optional .env file, returns the merged "config"
-    public static function init() {
+    public static function init($locale, $environment, $version) {
         $envFilename = Registry::get('applicationPath') . '/.env';
         if(file_exists($envFilename)) {
-            $env = Ini::parse($envFilename, true, Registry::get('locale') . '-' . Registry::get('environment') . '-' . Registry::get('version'), 'common', false);
+            $env = Ini::parse($envFilename, true, $locale . '-' . $environment . '-' . $version, 'common', false);
             $env = self::mergeEnvVariables($env);
         }
         else {
             $env = new \StdClass();
         }
-        return Ini::bindArrayToObject($env);
+        self::$data = Ini::bindArrayToObject($env);
     }
     
     // merges the values from the .env file and the environment variables (they overwrite the previous one)
@@ -28,7 +32,7 @@ abstract class Env
         }
         else {
             $valueFromEnv = getenv($previous);
-            if($valueFromEnv===false) { 
+            if($valueFromEnv===false) {
                 return $value;
             }
             else {
@@ -44,25 +48,14 @@ abstract class Env
      - server's environment (like SetEnv in .htaccess or SetEnv in apache's virtual host config)
     This function will return the value of a variable that would not have been defined earlier
     */
-    public static function get($key) {
+    public function __get($key) {
         $value = getenv($key);
         // look for the value in environment (that always overwrites the .env value)
         if($value!==false) {
              return $value;
         }
         else {
-            // if we ask for a nested variable (like db.my_site.password)
-            if(strpos($key, '.')) {
-                $explodedKey = explode('.', $key);
-                $value = null;
-                foreach($explodedKey as $k) {
-                    echo $k . '--';
-                }
-            }
-            else {
-                
-            }
-            
+            return $this->magicGet($key);
         }
     }
     

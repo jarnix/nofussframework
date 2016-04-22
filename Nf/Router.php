@@ -7,6 +7,8 @@ use Nf\Front;
 class Router extends Singleton
 {
     
+    protected static $_instance=null;
+    
     // pour le routeur
     private $routingPreferences = array();
 
