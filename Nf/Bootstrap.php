@@ -145,22 +145,14 @@ class Bootstrap
 
         // we use the requested section from the config.ini to load our config
         Config::init($locale, $environment, $version);
-                
-        $config = Config::getInstance();        
-        if(isset($config->date->timezone)) {
-            echo 'date is set';
-        }
-        else {
-            echo 'date is not set';
-        }
-        die();
-        
+        Registry::set('config', Config::getInstance());
+                        
         // parse the variables from the .env file or environment
         $env = Env::init($locale, $environment, $version);
         Registry::set('env', Env::getInstance());
         
-        // merge Env over Config to create the Settings Object
-        // Settings::init(Env::getInstance(), Config::getInstance());
+        // create the Settings Object
+        Registry::set('settings', Settings::getInstance());
 
         // let's block the use of index.php
         if (isset($_SERVER['REQUEST_URI']) && in_array($_SERVER['REQUEST_URI'], array(

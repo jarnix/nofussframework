@@ -3,60 +3,28 @@ namespace Nf;
 
 class Config extends Singleton
 {
-    // use Helper\StoreTrait;
+    use Helper\StoreTrait;
     
     protected static $_instance=null;
     protected static $data;
     
     public static function init($locale, $environment, $version) {
+        self::$data = new \StdClass();
         $config = Ini::parse(Registry::get('applicationPath') . '/configs/config.ini', true, $locale . '-' . $environment . '-' . $version, 'common', true);
         self::$data = $config;
     }
-    
-    
-      /*
-    Get the value of a key
-    For example, with Env, can be Config or Settings...):
-    - getting the instance of this class_uses
-        $env = \Nf\Env::getInstance();
-        $value = $env->thing->key;
-    - getting the instance through the static class :
-        $value = \Nf\Env::get()->thing->key;
-    */
-    public static function get($key = null) {
-        if($key === null) {
-            return self::getInstance();
+  
+    public function __get($key) {
+        /* 
+        because of a bug in php 5.6, we have
+        to try an isset before a get within an isset (!!!)
+        */
+        if($this->__isset($key)) {
+            return $this->magicGet($key);     
         }
         else {
-            $instance = self::getInstance();
-            return $instance->__get($key);    
+            return false;
         }
     }
 
-    // helper function
-    public function magicGet($key) {
-        $data = self::$data;
-        // if we ask for a nested variable (like db.my_site.password)
-        if(strpos($key, '.')) {
-            $explodedKey = explode('.', $key);
-            $tempValue = $data;
-            foreach($explodedKey as $k) {
-                $tempValue = $tempValue->$k;
-            }
-            return $tempValue;
-        }
-        else {
-            return $data->$key;
-        }
-    }
-    
-    
-    public function __get($key) {
-       return $this->magicGet($key);
-    }
-  
-    public function __isset($key) {
-        return isset(self::$data->$key);
-    }
-  
 }

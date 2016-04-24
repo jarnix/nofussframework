@@ -12,21 +12,16 @@ class Settings extends Singleton
     public static function get($key) {
         $env = Env::getInstance();
         $config = Config::getInstance();
-        /*
-        try {
+        
+        if(isset($env->$key)) {
             $value = $env->$key;
-            return $value;
         }
-        catch(\Exception $e) {
-            try {
-                $value = $config->$key;
-                return $value;
-            }
-            catch(\Exception $e) {
-                // throw new \Exception('Key "' . $key . '" does not exist');
-            }
+        else {
+             if(isset($config->$key)) {
+                 $value = $config->$key;
+             }
         }
-        */
+        return $value;
         return false;
     }
     
