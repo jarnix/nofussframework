@@ -6,6 +6,12 @@ Read the whole documentation on http://www.nofussframework.com.
 
 ![logo](http://www.nofussframework.com/assets/img/logo5.png "This logo is terrible")
 
+New in 1.3:
+- Env object (using environment variables and a .env -.ini syntax- at the root of the app)
+- Settings object (that merges Env over Config, it's a shortcut)
+- Config, Env, and Settings are also "global" objects, and use the same syntax
+- + multiple format getters (Settings::get('param.key') or Settings::get()->param->key or $settings = Settings::getInstance && $settings->param->key
+
 New in 1.2.6:
 - easier syntax for the url.ini
 
