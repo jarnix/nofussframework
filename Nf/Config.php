@@ -20,7 +20,7 @@ class Config extends Singleton
         to try an isset before a get within an isset (!!!)
         */
         if($this->__isset($key)) {
-            return $this->magicGet($key);     
+            return $this->magicGet($key);
         }
         else {
             return false;
