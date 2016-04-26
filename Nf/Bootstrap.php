@@ -228,6 +228,17 @@ class Bootstrap
             Registry::set('environment', $inEnvironment);
             Registry::set('locale', $inLocale);
             Registry::set('version', $inVersion);
+            
+            // we use the requested section from the config.ini to load our config
+            Config::init($inLocale, $inEnvironment, $inVersion);
+            Registry::set('config', Config::getInstance());
+                            
+            // parse the variables from the .env file or environment
+            $env = Env::init($inLocale, $inEnvironment, $inVersion);
+            Registry::set('env', Env::getInstance());
+            
+            // create the Settings Object
+            Registry::set('settings', Settings::getInstance());
 
             $arrParams = array();
 
