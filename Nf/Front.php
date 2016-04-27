@@ -319,43 +319,62 @@ class Front extends Singleton
             $this->_response->setCacheable($activeRoute['cacheMinutes']);
         }
         
+        // flag to allow the code of the controller to be executed
+        // or not if a middleware returns false
+        $allowedByPreMiddleware = true;
+        
         // call pre middlewares defined by the active route
         if (isset($activeRoute['middlewaresPre'])) {
             foreach ($activeRoute['middlewaresPre'] as $middleware) {
-                $object = new $middleware();
-                $object->execute();
+                if($allowedByPreMiddleware) {
+                    $object = new $middleware();
+                    $ret = $object->execute();
+                    if($ret === false) {
+                        $allowedByPreMiddleware = false;
+                    }
+                }
             }
             unset($middleware);
         }
         // call pre middlewares defined programatically
         if (isset($this->registeredMiddlewares[self::MIDDLEWARE_PRE])) {
             foreach ($this->registeredMiddlewares[self::MIDDLEWARE_PRE] as $middleware) {
-                $middleware->execute();
+                if($allowedByPreMiddleware) {
+                    $object = new $middleware();
+                    $ret = $object->execute();
+                    if($ret === false) {
+                        $allowedByPreMiddleware = false;
+                    }    
+                }
             }
         }
         
-        // call the action
-        call_user_func(array(
-            $this->_controllerInstance,
-            $this->_actionName . 'Action'
-        ));
-        $content = ob_get_clean();
-        $this->_response->addBodyPart($content);
+        if($allowedByPreMiddleware) {
+            // call the action
+            call_user_func(array(
+                $this->_controllerInstance,
+                $this->_actionName . 'Action'
+            ));
+            $content = ob_get_clean();
+            $this->_response->addBodyPart($content);
+            
+            // call post middlewares
+            if (isset($activeRoute['middlewaresPost'])) {
+                foreach ($activeRoute['middlewaresPost'] as $middleware) {
+                    $object = new $middleware();
+                    $object->execute();
+                }
+                unset($middleware);
+            }
+            // call post middlewares defined programatically, by instance
+            if (isset($this->registeredMiddlewares[self::MIDDLEWARE_POST])) {
+                foreach ($this->registeredMiddlewares[self::MIDDLEWARE_POST] as $middleware) {
+                    $middleware->execute();
+                }
+            }
+        }
         
-        // call post middlewares
-        if (isset($activeRoute['middlewaresPost'])) {
-            foreach ($activeRoute['middlewaresPost'] as $middleware) {
-                $object = new $middleware();
-                $object->execute();
-            }
-            unset($middleware);
-        }
-        // call post middlewares defined programatically, by instance
-        if (isset($this->registeredMiddlewares[self::MIDDLEWARE_POST])) {
-            foreach ($this->registeredMiddlewares[self::MIDDLEWARE_POST] as $middleware) {
-                $middleware->execute();
-            }
-        }
+      
     }
     
     // called after action
