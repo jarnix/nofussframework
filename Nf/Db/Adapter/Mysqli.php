@@ -182,10 +182,22 @@ class Mysqli extends AbstractAdapter
         return $this->getConnection()->affected_rows;
     }
 
-    public function delete($tableName, $where = '')
+    public function delete($tableName, $where = null)
     {
-        if ($where != '') {
-            $sql = "DELETE FROM " . $this->quoteIdentifier($tableName, true) . " WHERE " . $where;
+        if ($where !== null) {
+            $sql = "DELETE FROM " . $this->quoteIdentifier($tableName, true);
+            if(!is_array($where)) {
+                if ($where != '') {
+                    $sql .= " WHERE " . $where;
+                }    
+            }
+            else {
+                $whereFields = array();
+                foreach ($where as $key => $value) {
+                    $whereFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);
+                }
+                $sql .= " WHERE " . implode(' AND ', $whereFields);
+            }
         } else {
             $sql = "TRUNCATE TABLE" . $this->quoteIdentifier($tableName, true);
         }
