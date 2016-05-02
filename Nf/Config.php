@@ -26,5 +26,9 @@ class Config extends Singleton
             return false;
         }
     }
+    
+    public function __debugInfo(){
+        return [];
+    }
 
 }

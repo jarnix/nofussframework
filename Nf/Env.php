@@ -59,4 +59,8 @@ class Env extends Singleton
         }
     }
     
+    public function __debugInfo(){
+        return [];
+    }
+    
 }

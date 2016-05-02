@@ -52,5 +52,9 @@ class Settings extends Singleton
         $config = Config::getInstance();
         return (isset($env->$key) || isset($config->$key));
     }
+    
+    public function __debugInfo(){
+        return [];
+    }
         
 }
