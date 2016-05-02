@@ -43,6 +43,20 @@ class Http extends AbstractRequest
         return $_SERVER['REQUEST_METHOD'];
     }
 
+    public function isDelete() {
+        if ('DELETE' == $this->getMethod()) {
+            return true;
+        }
+        return false;
+    }
+
+    public function isPut() {
+        if ('PUT' == $this->getMethod()) {
+            return true;
+        }
+        return false;
+    }
+
     public function isPost()
     {
         if ('POST' == $this->getMethod()) {

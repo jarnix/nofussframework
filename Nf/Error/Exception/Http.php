@@ -17,6 +17,12 @@ class Http extends \Exception
     {
         $front = \Nf\Front::getInstance();
         $response = $front->getResponse();
+        if($response->getContentType()=='json') {
+            $response->addBodyPart(json_encode(['message' => $this->getMessage()]));    
+        }
+        else {
+            $response->addBodyPart($this->getMessage());
+        }
         $response->sendResponse();
     }
 }
