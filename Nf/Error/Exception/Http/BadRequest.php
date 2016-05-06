@@ -19,7 +19,7 @@ class BadRequest extends Http
      *
      * @param array $errors
      */
-    public function __construct($errors)
+    public function __construct($errors = [])
     {
         if (is_string($errors)) {
             $errors = array(
