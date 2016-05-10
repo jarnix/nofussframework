@@ -1,4 +1,4 @@
-No Fuss Framework is a framework designed for PHP 5.4+. It's meant to be fast, easy to learn, and scalable.
+No Fuss Framework is a framework designed for PHP 5.6+. It's meant to be fast, easy to learn, and scalable.
 
 It's a professional framework for building small or large projects.
 
@@ -6,7 +6,11 @@ Read the whole documentation on http://www.nofussframework.com.
 
 ![logo](http://www.nofussframework.com/assets/img/logo5.png "This logo is terrible")
 
-New in 1.3:
+Upcoming in 1.4 :
+- tbd
+- lol
+
+New in 1.3/stable
 - Env object (using environment variables and a .env -.ini syntax- at the root of the app)
 - Settings object (that merges Env over Config, it's a shortcut)
 - Config, Env, and Settings are also "global" objects, and use the same syntax
