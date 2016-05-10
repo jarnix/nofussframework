@@ -41,6 +41,3 @@ New in 1.2.0:
 - -m (for "make") options for publishing
 - compression of all files to a single one
 - bugfixes
-
-Buy me a beer:
-[![Tips](https://tips.60devs.com/images/button-black.svg)](https://tips.60devs.com/tip/520bdb77ce4f2241fcb4919a56393242)
