@@ -6,6 +6,9 @@ Read the whole documentation on http://www.nofussframework.com.
 
 ![logo](http://www.nofussframework.com/assets/img/logo5.png "This logo is terrible")
 
+Updates:
+- MIT license
+
 New in 1.3/stable
 - Env object (using environment variables and a .env -.ini syntax- at the root of the app)
 - Settings object (that merges Env over Config, it's a shortcut)
