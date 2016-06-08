@@ -1,0 +1,12 @@
+# deactivate proxies from Google AppEngine (http://www.dontbeevil.fr/duplicate-content-web-proxy/)
+RewriteEngine On
+RewriteCond %{HTTP_USER_AGENT} AppEngine-Google [NC]
+RewriteRule .* - [F]
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule !\.(js|ico|gif|jpg|png|css|zip|gz|swf)$ /index.php [L]
+
+Options -Indexes
+DirectoryIndex index.php index.html
