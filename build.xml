@@ -74,7 +74,7 @@
          description="Measure project size using PHPLOC and print human readable output. Intended for usage on the command line.">
   <exec executable="${toolsdir}phploc" taskname="phploc">
    <arg value="--count-tests" />
-   <arg path="${basedir}/library/php/classes/Nf" />
+   <arg path="${basedir}/Nf" />
    <arg path="${basedir}/tests" />
   </exec>
 
@@ -91,7 +91,7 @@
    <arg path="${basedir}/build/logs/phploc.csv" />
    <arg value="--log-xml" />
    <arg path="${basedir}/build/logs/phploc.xml" />
-   <arg path="${basedir}/library/php/classes/Nf" />
+   <arg path="${basedir}/Nf" />
    <arg path="${basedir}/tests" />
   </exec>
 
@@ -106,7 +106,7 @@
    <arg value="--jdepend-xml=${basedir}/build/logs/jdepend.xml" />
    <arg value="--jdepend-chart=${basedir}/build/pdepend/dependencies.svg" />
    <arg value="--overview-pyramid=${basedir}/build/pdepend/overview-pyramid.svg" />
-   <arg path="${basedir}/library/php/classes/Nf" />
+   <arg path="${basedir}/Nf" />
   </exec>
 
   <property name="pdepend.done" value="true"/>
@@ -116,7 +116,7 @@
          unless="phpmd.done"
          description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
   <exec executable="${toolsdir}phpmd" taskname="phpmd">
-  	<arg path="${basedir}/library/php/classes/Nf" />
+  	<arg path="${basedir}/Nf" />
     <arg value="text" />
    <arg path="${basedir}/build/phpmd.xml" />
   </exec>
@@ -129,7 +129,7 @@
          depends="prepare"
          description="Perform project mess detection using PHPMD and log result in XML format. Intended for usage within a continuous integration environment.">
   <exec executable="${toolsdir}phpmd" taskname="phpmd">
-   <arg path="${basedir}/library/php/classes/Nf" />
+   <arg path="${basedir}/Nf" />
    <arg value="xml" />
    <arg path="${basedir}/build/phpmd.xml" />
    <arg value="--reportfile" />
@@ -144,7 +144,7 @@
          description="Code beautifier. Intended for usage on the command line before committing.">
   <exec executable="${toolsdir}phpcbf" taskname="phpcbf">
    <arg value="--standard=PSR2" />
-   <arg path="${basedir}/library/php/classes/Nf" />
+   <arg path="${basedir}/Nf" />
   </exec>
 
   <property name="phpcbf.done" value="true"/>
@@ -156,7 +156,7 @@
   <exec executable="${toolsdir}phpcs" taskname="phpcs">
    <arg value="--standard=${basedir}/build/phpcs.xml" />
    <arg value="--extensions=php" />
-   <arg path="${basedir}/library/php/classes/Nf" />
+   <arg path="${basedir}/Nf" />
   </exec>
 
   <property name="phpcs.done" value="true"/>
@@ -171,7 +171,7 @@
    <arg value="--report-file=${basedir}/build/logs/checkstyle.xml" />
    <arg value="--standard=${basedir}/build/phpcs.xml" />
    <arg value="--extensions=php" />
-   <arg path="${basedir}/library/php/classes/Nf" />
+   <arg path="${basedir}/Nf" />
   </exec>
 
   <property name="phpcs.done" value="true"/>
@@ -181,7 +181,7 @@
          unless="phpcpd.done"
          description="Find duplicate code using PHPCPD and print human readable output. Intended for usage on the command line before committing.">
   <exec executable="${toolsdir}phpcpd" taskname="phpcpd">
-   <arg path="${basedir}/library/php/classes/Nf" />
+   <arg path="${basedir}/Nf" />
   </exec>
 
   <property name="phpcpd.done" value="true"/>
@@ -194,7 +194,7 @@
   <exec executable="${toolsdir}phpcpd" taskname="phpcpd">
    <arg value="--log-pmd" />
    <arg path="${basedir}/build/logs/pmd-cpd.xml" />
-   <arg path="${basedir}/library/php/classes/Nf" />
+   <arg path="${basedir}/Nf" />
   </exec>
 
   <property name="phpcpd.done" value="true"/>
