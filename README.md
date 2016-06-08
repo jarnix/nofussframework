@@ -7,6 +7,7 @@ Read the whole documentation on http://www.nofussframework.com.
 ![logo](http://www.nofussframework.com/assets/img/logo5.png "This logo is terrible")
 
 Updates:
+- added build settings (with ant, => lint, phpcbf, etc)
 - MIT license
 
 New in 1.3/stable
