@@ -12,7 +12,7 @@ class Make
      *            php index.php -m "\App\Mymake\Compressor::compress?type=js", type=js will be accessible with a
      *            $front = \Nf\Front::getInstance();
      *            $params = $front->getRequest()->getParams();
-     *            
+     *
      */
     
     // merge all the framework files to a single php file, merge all the routes to /cache/allroutes.php

@@ -316,10 +316,9 @@ class Http extends AbstractResponse
 
     public static function colorText($text, $color, $alternativeSeparator = false)
     {
-        if(!$alternativeSeparator) {
+        if (!$alternativeSeparator) {
             return '<span style="color:' . $color . '">' . $text . '</span>';
-        }
-        else {
+        } else {
             return $text;
         }
     }

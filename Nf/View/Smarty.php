@@ -23,7 +23,7 @@ class Smarty extends View
 
     /**
      * Return the template engine object, if any
-     * 
+     *
      * @return mixed
      */
     public function getEngine()
@@ -74,7 +74,7 @@ class Smarty extends View
      * Allows testing with empty() and
      * isset() to work
      *
-     * @param string $key            
+     * @param string $key
      * @return boolean
      */
     public function __isset($key)
@@ -86,7 +86,7 @@ class Smarty extends View
     /**
      * Allows unset() on object properties to work
      *
-     * @param string $key            
+     * @param string $key
      * @return void
      */
     public function __unset($key)

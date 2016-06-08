@@ -39,7 +39,7 @@ class Bootstrap
             if (! empty($_SERVER['HTTP_HOST'])) {
                 // let's check the environment from the http host (and set the other values)
                 list ($localeFromDomain, $versionFromDomain, $environmentFromDomain) = $this->getLocaleAndVersionAndEnvironmentFromDomain($_SERVER['HTTP_HOST'], $urlIni);
-                if(!empty($environmentFromDomain)) {
+                if (!empty($environmentFromDomain)) {
                     $environment = $environmentFromDomain;
                 }
             }
@@ -97,8 +97,7 @@ class Bootstrap
                             }
                             break;
                     }
-                }
-                else {
+                } else {
                     break;
                 }
             }

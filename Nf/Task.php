@@ -18,9 +18,9 @@ class Task
     function fork()
     {
         $pid = pcntl_fork();
-        if ($pid == - 1)
+        if ($pid == - 1) {
             throw new Exception('fork error on Task object');
-        elseif ($pid) {
+        } elseif ($pid) {
             // we are in the parent class
             $this->pid = $pid;
             // echo "< in parent with pid {$this->pid}\n";
@@ -50,6 +50,3 @@ class Task
         return $this->pid;
     }
 }
-
-
-

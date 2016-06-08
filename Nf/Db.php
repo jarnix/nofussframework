@@ -37,7 +37,7 @@ class Db
     {
         $config = \Nf\Registry::get('config');
         
-        if(!isset($config->db->$configName)) {
+        if (!isset($config->db->$configName)) {
             throw new \Exception('The adapter "' . $configName . '" is not defined in the config file');
         }
         

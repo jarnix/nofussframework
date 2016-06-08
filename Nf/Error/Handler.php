@@ -118,7 +118,8 @@ class Handler extends \Exception
             try {
                 $response->setHttpResponseCode($httpCode);
                 $response->sendHeaders();
-            } catch (Exception $e) {}
+            } catch (Exception $e) {
+            }
             
             $configName = strtolower($type);
             
@@ -151,14 +152,16 @@ class Handler extends \Exception
                 if (isset($config->error->logger->class) && strtolower($config->error->logger->class) != 'syslog') {
                     $className = $config->error->logger->class;
                     $logger = new $className();
-                    if (! $logger->log($err)) {}
+                    if (! $logger->log($err)) {
+                    }
                 } else {
                     $logger = new \Nf\Error\Logger\Syslog();
-                    if (! $logger->log($err)) {}
+                    if (! $logger->log($err)) {
+                    }
                 }
             }
             
-            if(isset($response)) {
+            if (isset($response)) {
                 if ($response->isBinary()) {
                     $response->setContentType('html');
                 }
@@ -169,7 +172,8 @@ class Handler extends \Exception
                 try {
                     $response->setHttpResponseCode($err['httpCode']);
                     $response->sendHeaders();
-                } catch (Exception $e) {}
+                } catch (Exception $e) {
+                }
                 
                 if (isset($config->error->displayMethod)) {
                     if ($config->error->displayMethod == 'forward') {
@@ -192,8 +196,7 @@ class Handler extends \Exception
                         }
                     }
                 }
-            }
-            else {
+            } else {
                 throw new \Exception($exception);
             }
             return true;

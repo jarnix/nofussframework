@@ -28,7 +28,8 @@ class Autoloader
 
     const defaultSuffix = '.php';
 
-    public function __construct() {
+    public function __construct()
+    {
         
     }
     
@@ -120,8 +121,8 @@ class Autoloader
         global $applicationPath;
         global $libraryPath;
         
-        if($mapFilePath === null) {
-            $mapFilePath = $applicationPath . '/cache/autoloader.map.php';    
+        if ($mapFilePath === null) {
+            $mapFilePath = $applicationPath . '/cache/autoloader.map.php';
         }
         
         if (file_exists($mapFilePath)) {

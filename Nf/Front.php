@@ -326,10 +326,10 @@ class Front extends Singleton
         // call pre middlewares defined by the active route
         if (isset($activeRoute['middlewaresPre'])) {
             foreach ($activeRoute['middlewaresPre'] as $middleware) {
-                if($allowedByPreMiddleware) {
+                if ($allowedByPreMiddleware) {
                     $object = new $middleware();
                     $ret = $object->execute();
-                    if($ret === false) {
+                    if ($ret === false) {
                         $allowedByPreMiddleware = false;
                     }
                 }
@@ -339,17 +339,17 @@ class Front extends Singleton
         // call pre middlewares defined programatically
         if (isset($this->registeredMiddlewares[self::MIDDLEWARE_PRE])) {
             foreach ($this->registeredMiddlewares[self::MIDDLEWARE_PRE] as $middleware) {
-                if($allowedByPreMiddleware) {
+                if ($allowedByPreMiddleware) {
                     $object = new $middleware();
                     $ret = $object->execute();
-                    if($ret === false) {
+                    if ($ret === false) {
                         $allowedByPreMiddleware = false;
-                    }    
+                    }
                 }
             }
         }
         
-        if($allowedByPreMiddleware) {
+        if ($allowedByPreMiddleware) {
             // call the action
             call_user_func(array(
                 $this->_controllerInstance,

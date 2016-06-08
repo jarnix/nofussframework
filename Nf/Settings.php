@@ -9,52 +9,51 @@ class Settings extends Singleton
       
     protected static $_instance = null;
       
-    public static function get($key = null) {
+    public static function get($key = null)
+    {
         
-        if($key===null) {
+        if ($key===null) {
             return self::getInstance();
-        }
-        else {
-            
-            if(strpos($key, '.')) {
+        } else {
+            if (strpos($key, '.')) {
                 $explodedKey = explode('.', $key);
                 $tempValue = self::getInstance();
-                foreach($explodedKey as $k) {
+                foreach ($explodedKey as $k) {
                     $tempValue = $tempValue->$k;
                 }
                 return $tempValue;
-            }
-            else {
+            } else {
                 $env = Env::getInstance();
                 $config = Config::getInstance();
                 
                 $value = false;
                 
-                if(isset($env->$key)) {
+                if (isset($env->$key)) {
                     $value = $env->$key;
-                }
-                else {
-                    if(isset($config->$key)) {
+                } else {
+                    if (isset($config->$key)) {
                         $value = $config->$key;
                     }
                 }
-                return $value;    
+                return $value;
             }
         }
     }
     
-    public function __get($key) {
+    public function __get($key)
+    {
         return self::get($key);
     }
     
-    public function __isset($key) {
+    public function __isset($key)
+    {
         $env = Env::getInstance();
         $config = Config::getInstance();
         return (isset($env->$key) || isset($config->$key));
     }
     
-    public function __debugInfo(){
+    public function __debugInfo()
+    {
         return [];
     }
-        
 }

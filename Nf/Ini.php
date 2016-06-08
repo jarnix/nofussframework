@@ -68,18 +68,16 @@ class Ini
             if ($sectionName !== null) {
                 // return the specified section contents if it exists
                 if (isset(self::$result[$sectionName])) {
-                    if($toObject) {
-                        return self::bindArrayToObject(self::$result[$sectionName]);    
-                    }
-                    else {
+                    if ($toObject) {
+                        return self::bindArrayToObject(self::$result[$sectionName]);
+                    } else {
                         return self::$result[$sectionName];
                     }
                 } else {
                     if ($fallbackSectionName !== null) {
-                        if($toObject) {
-                            return self::bindArrayToObject(self::$result[$fallbackSectionName]);    
-                        }
-                        else {
+                        if ($toObject) {
+                            return self::bindArrayToObject(self::$result[$fallbackSectionName]);
+                        } else {
                             return self::$result[$fallbackSectionName];
                         }
                     } else {
@@ -90,10 +88,9 @@ class Ini
         }
         
         // if no specific section is required, just return the whole result
-        if($toObject) {
+        if ($toObject) {
             return self::bindArrayToObject(self::$result);
-        }
-        else {
+        } else {
             return self::$result;
         }
     }

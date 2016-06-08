@@ -164,12 +164,11 @@ class Mysqli extends AbstractAdapter
             $updateFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);
         }
         $sql .= " " . implode(', ', $updateFields);
-        if(!is_array($where)) {
+        if (!is_array($where)) {
             if ($where != '') {
                 $sql .= " WHERE " . $where;
-            }    
-        }
-        else {
+            }
+        } else {
             $whereFields = array();
             foreach ($where as $key => $value) {
                 $whereFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);
@@ -186,12 +185,11 @@ class Mysqli extends AbstractAdapter
     {
         if ($where !== null) {
             $sql = "DELETE FROM " . $this->quoteIdentifier($tableName, true);
-            if(!is_array($where)) {
+            if (!is_array($where)) {
                 if ($where != '') {
                     $sql .= " WHERE " . $where;
-                }    
-            }
-            else {
+                }
+            } else {
                 $whereFields = array();
                 foreach ($where as $key => $value) {
                     $whereFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);

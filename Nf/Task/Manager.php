@@ -69,7 +69,8 @@ class Manager
      */
     protected function launchAllTasks()
     {
-        while ($this->launchNextTask()) {}
+        while ($this->launchNextTask()) {
+        }
     }
     
     
@@ -117,8 +118,9 @@ class Manager
     protected function pidToTaskInfos($pid)
     {
         foreach ($this->pool as $taskInfos) {
-            if ($taskInfos['task']->pid() == $pid)
+            if ($taskInfos['task']->pid() == $pid) {
                 return $taskInfos;
+            }
         }
         return false;
     }
@@ -134,7 +136,7 @@ class Manager
             $cpuinfo = file_get_contents('/proc/cpuinfo');
             preg_match_all('/^processor/m', $cpuinfo, $matches);
             $numCpus = count($matches[0]);
-        } else if ('WIN' == strtoupper(substr(PHP_OS, 0, 3))) {
+        } elseif ('WIN' == strtoupper(substr(PHP_OS, 0, 3))) {
             $process = @popen('wmic cpu get NumberOfCores', 'rb');
             if (false !== $process) {
                 fgets($process);

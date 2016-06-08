@@ -2,41 +2,50 @@
 
 namespace Nf\Front\Response\Cli;
 
-class FormatTime {
+class FormatTime
+{
 
 }
 
-class Timer {
+class Timer
+{
     public $time;
-    function __construct(){
+    function __construct()
+    {
         $this->start();
     }
-    function start($offset=0){
+    function start($offset = 0)
+    {
         $this->time = microtime(true) + $offset;
     }
-    function seconds(){
+    function seconds()
+    {
         return microtime(true) - $this->time;
     }
 };
 
 // We need this to limit the frequency of the progress bar. Or else it
 // hugely slows down the app.
-class FPSLimit {
+class FPSLimit
+{
     public $frequency;
     public $maxDt;
     public $timer;
-    function __construct($freq){
+    function __construct($freq)
+    {
         $this->setFrequency($freq);
         $this->timer = new Timer();
         $this->timer->start();
     }
-    function setFrequency($freq){
+    function setFrequency($freq)
+    {
         $this->frequency = $freq;
         $this->maxDt = 1.0/$freq;
     }
-    function frame(){
+    function frame()
+    {
         $dt = $this->timer->seconds();
-        if($dt > $this->maxDt){
+        if ($dt > $this->maxDt) {
             $this->timer->start($dt - $this->maxDt);
             return true;
         }
@@ -44,12 +53,16 @@ class FPSLimit {
     }
 };
 
-class Progress {
+class Progress
+{
     // generic progress class to update different things
-    function update($units, $total){}
+    function update($units, $total)
+    {
+    }
 }
 
-class ProgressBar extends Progress {
+class ProgressBar extends Progress
+{
     private $cols;
     private $limiter;
     private $units;
@@ -57,62 +70,67 @@ class ProgressBar extends Progress {
     private $autoCols = false;
     private $first = true;
 
-    function __construct($total = null, $cols = null){
-        if($total != null) {
-            $this->total = $total; 
+    function __construct($total = null, $cols = null)
+    {
+        if ($total != null) {
+            $this->total = $total;
         }
-        if($this->cols==null) {
+        if ($this->cols==null) {
             $this->autoCols = true;
-        }
-        else {
+        } else {
             $this->cols = $cols;
         }
         // change the fps limit as needed
         $this->limiter = new FPSLimit(10);
     }
 
-    function __destruct(){
-        if(!$this->first) {
-            $this->draw();    
+    function __destruct()
+    {
+        if (!$this->first) {
+            $this->draw();
         }
     }
 
-    function updateSize(){
+    function updateSize()
+    {
         // get the number of columns
         exec("tput cols 2>&1", $out, $ret);
-        if($ret!=0) {
+        if ($ret!=0) {
             $this->cols=40;
-        }
-        else {
+        } else {
             $this->cols = (int)$out[0];
         }
     }
 
-    function draw(){
-        if($this->autoCols) {
-            $this->updateSize();    
+    function draw()
+    {
+        if ($this->autoCols) {
+            $this->updateSize();
         }
         self::showStatus($this->units, $this->total, $this->cols, $this->cols);
     }
 
-    function update($units, $total = null){
+    function update($units, $total = null)
+    {
         $this->units = $units;
-        if($total != null) {
+        if ($total != null) {
             $this->total = $total;
         }
-        if(!$this->limiter->frame())
+        if (!$this->limiter->frame()) {
             return;
+        }
         $this->draw();
     }
     
-    private function showStatus($done, $total, $size=30, $lineWidth=-1) {
+    private function showStatus($done, $total, $size = 30, $lineWidth = -1)
+    {
         
-        if($this->first) {
+        if ($this->first) {
             echo PHP_EOL;
             $this->first = false;
         }
         
-        if($lineWidth <= 0){
+        if ($lineWidth <= 0) {
             $lineWidth = 50;
         }
 
@@ -121,9 +139,13 @@ class ProgressBar extends Progress {
         // to take account for [ and ]
         $size -= 3;
         // if we go over our bound, just ignore it
-        if($done > $total) return;
+        if ($done > $total) {
+            return;
+        }
 
-        if(empty($start_time)) $start_time=time();
+        if (empty($start_time)) {
+            $start_time=time();
+        }
         $now = time();
 
         $perc=(double)($done/$total);
@@ -139,7 +161,7 @@ class ProgressBar extends Progress {
         
         $status_bar.=str_repeat("=", $bar);
         
-        if($bar<$size){
+        if ($bar<$size) {
             $status_bar.=">";
             $status_bar.=str_repeat(" ", $size-$bar);
         } else {
@@ -160,30 +182,32 @@ class ProgressBar extends Progress {
         $details .= " ETA: " . self::formatTime($eta)." TOTAL: ". self::formatTime($elapsed) . "   ";
 
         $lineWidth--;
-        if(strlen($details) >= $lineWidth){
+        if (strlen($details) >= $lineWidth) {
             $details = substr($details, 0, $lineWidth-1);
         }
         echo "$details\n$status_bar";
 
         // when done, send a newline
-        if($done == $total) {
+        if ($done == $total) {
             echo "\n";
         }
     }
     
-    public function done() {
+    public function done()
+    {
         $this->update($this->total, $this->total);
     }
     
-     public static function formatTime($sec) {
-        if($sec > 100){
+     public static function formatTime($sec)
+     {
+        if ($sec > 100) {
             $sec /= 60;
-            if($sec > 100){
+            if ($sec > 100) {
                 $sec /= 60;
                 return number_format($sec) . " hr";
             }
             return number_format($sec) . " min";
         }
-        return number_format($sec) . " sec";        
-    }
+        return number_format($sec) . " sec";
+        }
 }

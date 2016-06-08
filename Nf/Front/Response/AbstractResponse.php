@@ -40,7 +40,8 @@ abstract class AbstractResponse
     }
 
     public function setHttpResponseCode($code)
-    {}
+    {
+    }
 
     public function isBinary()
     {
@@ -53,7 +54,8 @@ abstract class AbstractResponse
     }
 
     public function setContentType($type = 'html')
-    {}
+    {
+    }
 
     public static function displayErrorHelper($err, $alternativeSeparator = false)
     {
@@ -71,7 +73,7 @@ abstract class AbstractResponse
             $trace = $err['fullException']->getTrace();
             foreach ($trace as $entry) {
                 $output .= self::stackTracePrintEntry($entry);
-                if(isset($entry['file']) && isset($entry['line'])) {
+                if (isset($entry['file']) && isset($entry['line'])) {
                     $output .= '-----' . $separator;
                     $output .= implode($separator, self::getFileSample($entry['file'], $entry['line'], 2));
                     $output .= $separator . '-----' . $separator;
