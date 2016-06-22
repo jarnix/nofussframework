@@ -42,6 +42,11 @@ class Manager
         );
         $this->numberOfTasks++;
     }
+
+    public function getNumberOfThreadsToLaunch()
+    {
+        return $this->numberOfThreadsToLaunch;
+    }
     
     
     /**
@@ -107,11 +112,19 @@ class Manager
     protected function finishTask($pid)
     {
         $taskInfos = $this->pidToTaskInfos($pid);
-        if ($taskInfos) {
-            $taskInfos['task']->finish();
-            $taskInfos['callback']();
-            $this->numberOfRunningThreads--;
+        if (!$taskInfos) {
+            return;
         }
+
+        $taskInfos['task']->finish();
+
+        if ( !empty($taskInfos['callback']) ) {
+            $taskInfos['callback'](
+                $taskInfos['task']->getCallbackParams()
+            );
+        }
+
+        $this->numberOfRunningThreads--;
     }
     
     
