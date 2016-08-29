@@ -26,7 +26,7 @@ class LabelManager extends Singleton
     public static function get($lbl)
     {
         $instance=self::$_instance;
-        return $instance->labels[$lbl];
+        return (isset($instance->labels[$lbl])) ? $instance->labels[$lbl] : '' ;
     }
 
     public static function getAll($section = null)
