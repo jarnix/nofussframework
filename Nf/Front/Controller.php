@@ -53,9 +53,9 @@ class Controller
     {
         return true;
     }
-
+    
     // called after action
-    public function postAction()
+    public function optionsAction()
     {
 
     }

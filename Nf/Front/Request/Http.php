@@ -67,6 +67,14 @@ class Http extends AbstractRequest
         return false;
     }
 
+    public function isOptions()
+    {
+        if ('OPTIONS' == $this->getMethod()) {
+            return true;
+        }
+        return false;
+    }
+
     public function isGet()
     {
         if ('GET' == $this->getMethod()) {

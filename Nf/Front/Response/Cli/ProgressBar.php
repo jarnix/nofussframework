@@ -209,5 +209,5 @@ class ProgressBar extends Progress
             return number_format($sec) . " min";
         }
         return number_format($sec) . " sec";
-        }
+     }
 }

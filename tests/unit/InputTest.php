@@ -174,7 +174,7 @@ class InputTest extends PHPUnit_Framework_TestCase
                 Input::V_NUMERIC
                 , Input::V_REQUIRED
                 , array(Input::V_GREATERTHAN, $ageValue - 1)        // greather than age - 1
-                , array(Input::V_LESSTHAN, $ageValue + 1)           // less than age - 1
+                , array(Input::V_LESSTHAN, $ageValue + 1)           // less than age + 1
                 , array(Input::V_EQUALS, $ageValue)                 // equals to itself
             )
         );

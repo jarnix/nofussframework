@@ -105,7 +105,7 @@ class Php extends View
         $content=ob_get_contents();
         ob_end_clean();
         return $content;
-     }
+        }
 
 
         public function setBasePath($path)

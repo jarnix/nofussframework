@@ -265,7 +265,7 @@ class Front extends Singleton
 
     private function checkMethodForAction($foundController)
     {
-        // on lancera dans l'ordre le init, action, postAction
+        // on lancera dans l'ordre le init, action
         require_once($foundController);
         $controllerClassName = $this->_moduleNamespace . '\\' . ucfirst($this->_moduleName) . '\\' . ucfirst($this->_controllerName) . 'Controller';
         $this->_controllerInstance = new $controllerClassName($this);
@@ -348,6 +348,10 @@ class Front extends Singleton
                 }
             }
         }
+
+        // handle CORS using the cors built-in middleware
+        $cors = new \Nf\Middleware\Cors();
+        $cors->execute();     
         
         if ($allowedByPreMiddleware) {
             // call the action
