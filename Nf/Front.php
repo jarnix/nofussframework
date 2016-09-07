@@ -331,6 +331,7 @@ class Front extends Singleton
                     $ret = $object->execute();
                     if ($ret === false) {
                         $allowedByPreMiddleware = false;
+                        break;
                     }
                 }
             }
@@ -344,14 +345,17 @@ class Front extends Singleton
                     $ret = $object->execute();
                     if ($ret === false) {
                         $allowedByPreMiddleware = false;
+                        break;
                     }
                 }
             }
         }
 
-        // handle CORS using the cors built-in middleware
-        $cors = new \Nf\Middleware\Cors();
-        $cors->execute();     
+        if($allowedByPreMiddleware) {
+            // handle CORS using the cors built-in middleware
+            $corsPreflight = new \Nf\Middleware\CorsPreflight();
+            $allowedByPreMiddleware &= $corsPreflight->execute();
+        }
         
         if ($allowedByPreMiddleware) {
             // call the action

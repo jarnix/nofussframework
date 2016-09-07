@@ -9,9 +9,23 @@ use \Nf\Middleware\Pre;
 use \Nf\Front;
 use \Nf\Front\Request\Http;
 
-class Cors implements \Nf\Middleware\MiddlewareInterface {
+class CorsPreflight implements \Nf\Middleware\MiddlewareInterface {
     
     use Pre;
+
+    /*
+    Overwrite these values in your config.ini:
+    security.cors.allowed_origins = "*"
+    security.cors.allowed_methods = GET, POST, DELETE, PUT, PATCH, OPTIONS
+    security.cors.allowed_credentials = true
+    security.cors.allowed_headers = authorization
+    security.cors.max_age = 86400
+    */
+    const DEFAULT_ALLOWED_ORIGINS = '*';
+    const DEFAULT_ALLOWED_METHODS = 'GET, POST, DELETE, PUT, PATCH, OPTIONS';
+    const DEFAULT_ALLOWED_CREDENTIALS = true;
+    const DEFAULT_ALLOWED_HEADERS = 'authorization';
+    const DEFAULT_MAX_AGE = 86400;
 
     public function execute() {
         
@@ -40,7 +54,12 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
                                     $corsAllowed = false;
                                     // it's a CORS preflight request
                                     // origins
-                                    $allowedOriginsFromSettings = $settings->security->cors->allowed_origins;
+                                    if(isset($settings->security->cors->allowed_origins)) {
+                                        $allowedOriginsFromSettings = $settings->security->cors->allowed_origins;
+                                    }
+                                    else {
+                                        $allowedOriginsFromSettings = self::DEFAULT_ALLOWED_ORIGINS;
+                                    }
                                     if($allowedOriginsFromSettings!='*') {
                                         $allowedOrigins = array_map('trim', explode(',', $settings->security->cors->allowed_origins));
                                         if(in_array($parsedCurrent['host'], $allowedOrigins)) {
@@ -51,13 +70,24 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
                                         $corsAllowed = true;
                                     }
                                     // methods
-                                    $allowedMethodsFromSettings = $settings->security->cors->allowed_methods;
-                                    $allowedMethods = array_map('strtoupper', array_map('trim', explode(',', $settings->security->cors->allowed_methods)));
+                                    if(isset($settings->security->cors->allowed_methods)) {
+                                        $allowedMethodsFromSettings = $settings->security->cors->allowed_methods;
+                                    }
+                                    else {
+                                        $allowedMethodsFromSettings = self::DEFAULT_ALLOWED_METHODS;
+                                    }
+                                    $allowedMethods = array_map('strtoupper', array_map('trim', explode(',', $allowedMethodsFromSettings)));
                                     if(!in_array(strtoupper($front->getRequest()->getMethod()), $allowedMethods)) {
                                         $corsAllowed = false;
                                     }
                                     // headers
-                                    $allowedHeaders = array_map('trim', explode(',', $settings->security->cors->allowed_headers));
+                                    if(isset($settings->security->cors->allowed_headers)) {
+                                        $allowedHeadersFromSettings = $settings->security->cors->allowed_headers;
+                                    }
+                                    else {
+                                        $allowedHeadersFromSettings = self::DEFAULT_ALLOWED_HEADERS;
+                                    }
+                                    $allowedHeaders = array_map('trim', explode(',', $allowedHeadersFromSettings));
                                     // sending the (empty) response
                                     if($corsAllowed) {
                                         header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
@@ -70,11 +100,25 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
                                         }
                                         header('Vary: ' . implode(', ', $varyHeaders));
                                         header('Access-Control-Allow-Methods: ' . implode(', ', $allowedMethods));
-                                        if ($settings->security->cors->allowed_credentials) {
+                                        if(isset($settings->security->cors->allowed_credentials)) {
+                                            $allowedCredentialsFromSettings = $settings->security->cors->allowed_credentials;
+                                        }
+                                        else {
+                                            $allowedCredentialsFromSettings = self::DEFAULT_ALLOWED_CREDENTIALS;
+                                        }
+                                        if ($allowedCredentialsFromSettings) {
                                             header('Access-Control-Allow-Credentials: true');
                                         }
                                         header('Access-Control-Allow-Headers: ' . implode(', ', $allowedHeaders));
-                                        header('Access-Control-Max-Age: ' . $settings->security->cors->max_age);
+                                        
+                                        if(isset($settings->security->cors->max_age)) {
+                                            $allowedMaxAgeFromSettings = $settings->security->cors->max_age;
+                                        }
+                                        else {
+                                            $allowedMaxAgeFromSettings = self::DEFAULT_MAX_AGE;
+                                        }
+                                        header('Access-Control-Max-Age: ' . $allowedMaxAgeFromSettings);
+                                        return true;
                                     }
                                     else {
                                         return false;
