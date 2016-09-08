@@ -353,7 +353,7 @@ class Front extends Singleton
 
         if($allowedByPreMiddleware) {
             // handle CORS using the cors built-in middleware
-            $corsPreflight = new \Nf\Middleware\CorsPreflight();
+            $corsPreflight = new \Nf\Middleware\Cors();
             $allowedByPreMiddleware &= $corsPreflight->execute();
         }
         
