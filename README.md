@@ -7,6 +7,16 @@ Read the whole documentation on http://www.nofussframework.com.
 ![logo](http://www.nofussframework.com/assets/img/logo5.png "This logo is terrible")
 
 Updates:
+- added CORS support, enable it in your config.ini:
+```
+security.cors.enable = true
+; (default values)
+; security.cors.allowed_origins = "*"
+; security.cors.allowed_methods = GET, POST, PUT, PATCH, DELETE, OPTIONS
+; security.cors.allowed_credentials = true
+; security.cors.allowed_headers = Authorization
+; security.cors.max_age = 86400
+```
 - added build settings (with ant, => lint, phpcbf, etc)
 - MIT license
 
