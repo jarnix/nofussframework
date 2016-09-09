@@ -322,7 +322,11 @@ class Front extends Singleton
         // flag to allow the code of the controller to be executed
         // or not if a middleware returns false
         $allowedByPreMiddleware = true;
-        
+
+         // handle CORS using the cors built-in middleware
+        $corsPreflight = new \Nf\Middleware\Cors();
+        $allowedByPreMiddleware = $corsPreflight->execute();
+
         // call pre middlewares defined by the active route
         if (isset($activeRoute['middlewaresPre'])) {
             foreach ($activeRoute['middlewaresPre'] as $middleware) {
@@ -350,12 +354,6 @@ class Front extends Singleton
                 }
             }
         }
-
-        if($allowedByPreMiddleware) {
-            // handle CORS using the cors built-in middleware
-            $corsPreflight = new \Nf\Middleware\Cors();
-            $allowedByPreMiddleware &= $corsPreflight->execute();
-        }
         
         if ($allowedByPreMiddleware) {
             // call the action
@@ -380,8 +378,7 @@ class Front extends Singleton
                     $middleware->execute();
                 }
             }
-        }
-        
+        }        
       
     }
     

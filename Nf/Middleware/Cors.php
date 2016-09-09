@@ -120,6 +120,10 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
                                     $allowedMaxAgeFromSettings = self::DEFAULT_MAX_AGE;
                                 }
                                 header('Access-Control-Max-Age: ' . $allowedMaxAgeFromSettings);
+                                // every OPTIONS request should return a 200 ok and bypass every other middleware
+                                if ($front->getRequest()->isOptions()) {
+                                    return false;
+                                }
                                 return true;
                             }
                             else {
