@@ -315,36 +315,13 @@ class Router extends Singleton
     }
 
     // returns the url from the defined routes by its name
-    public function getNamedUrl($name, $params = array(), $version = null, $locale = null, $getFullUrl = true)
+    public function getNamedUrl($name, $params = array(), $version = null, $locale = null)
     {
         if ($version == null) {
             $version = Registry::get('version');
         }
         if ($locale == null) {
             $locale = Registry::get('locale');
-        }
-        // get the actual domain name from the url.ini
-        $domainName = '';
-        if ($getFullUrl) {
-            if (! isset($this->allVersionsUrls[$version][$locale])) {
-                $urlIni = Registry::get('urlIni');
-                $localeSuffix = $urlIni->suffixes->$locale;
-                $versionPrefix = $urlIni->versions->$version;
-                if (strpos($versionPrefix, '|') !== false) {
-                    $arrVersionPrefix = explode('|', $versionPrefix);
-                    $versionPrefix = $arrVersionPrefix[0];
-                    if ($versionPrefix == '<>') {
-                        $versionPrefix = '';
-                    }
-                }
-                $domainName = str_replace('[version]', $versionPrefix, $localeSuffix);
-                if (! isset($this->allVersionsUrls[$version])) {
-                    $this->allVersionsUrls[$version] = array();
-                    $this->allVersionsUrls[$version][$locale] = $domainName;
-                }
-            } else {
-                $domainName = $this->allVersionsUrls[$version][$locale];
-            }
         }
         $foundRoute = false;
         if (isset($this->allRoutesByVersionAndLocale[$version][$locale][$name])) {
@@ -364,11 +341,7 @@ class Router extends Singleton
                     $url = str_replace($result[$matchi][0], $params[$result[$matchi][1]], $url);
                 }
             }
-            if ($getFullUrl) {
-                return $domainName . '/' . $url;
-            } else {
-                return $url;
-            }
+            return $url;
         } else {
             throw new \Exception('Cannot find route named "' . $name . '" (version=' . $version . ', locale=' . $locale . ')');
         }
