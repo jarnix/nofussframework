@@ -198,8 +198,8 @@ class ProgressBar extends Progress
         $this->update($this->total, $this->total);
     }
     
-     public static function formatTime($sec)
-     {
+    public static function formatTime($sec)
+    {
         if ($sec > 100) {
             $sec /= 60;
             if ($sec > 100) {
@@ -209,5 +209,5 @@ class ProgressBar extends Progress
             return number_format($sec) . " min";
         }
         return number_format($sec) . " sec";
-     }
+    }
 }

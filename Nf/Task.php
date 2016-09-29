@@ -30,7 +30,7 @@ class Task
             $this->pid = posix_getpid();
 
             $callbackParams = $this->run();
-            $this->setCallbackParams( $callbackParams );
+            $this->setCallbackParams($callbackParams);
 
             exit(0);
         }
@@ -56,12 +56,14 @@ class Task
     public function getCallbackParams()
     {
         $shmId = @shmop_open($this->pid, 'a', 0644, 0);
-        if ( empty($shmId) ) {
+        if (empty($shmId)) {
             return false;
         }
 
-        $datas = unserialize( shmop_read(
-            $shmId, 0, shmop_size($shmId)
+        $datas = unserialize(shmop_read(
+            $shmId,
+            0,
+            shmop_size($shmId)
         ));
         shmop_delete($shmId);
         shmop_close($shmId);
@@ -69,13 +71,13 @@ class Task
         return $datas;
     }
 
-    protected function setCallbackParams( $callbackParams )
+    protected function setCallbackParams($callbackParams)
     {
-        if ( empty($callbackParams) ) {
+        if (empty($callbackParams)) {
             return false;
         }
 
-        $strDatas = serialize( $callbackParams );
+        $strDatas = serialize($callbackParams);
 
         $shmId = shmop_open(
             $this->pid,
@@ -84,7 +86,7 @@ class Task
             strlen($strDatas)
         );
 
-        if ( !$shmId ) {
+        if (!$shmId) {
             echo 'Couldn\'t create shared memory segment' . PHP_EOL;
 
             return false;
@@ -92,12 +94,11 @@ class Task
 
         $sizeWritten = shmop_write($shmId, $strDatas, 0);
 
-        if( $sizeWritten != strlen($strDatas) ) {
+        if ($sizeWritten != strlen($strDatas)) {
             echo 'Couldn\'t write shared memory data'.PHP_EOL;
             return false;
         }
 
         return true;
     }
-
 }

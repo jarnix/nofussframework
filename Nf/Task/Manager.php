@@ -118,7 +118,7 @@ class Manager
 
         $taskInfos['task']->finish();
 
-        if ( !empty($taskInfos['callback']) ) {
+        if (!empty($taskInfos['callback'])) {
             $taskInfos['callback'](
                 $taskInfos['task']->getCallbackParams()
             );

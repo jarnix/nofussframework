@@ -236,12 +236,11 @@ class Http extends AbstractResponse
     // sends header to allow the browser to cache the response a given time
     public function setCacheable($minutes)
     {
-        if($minutes <= 0) {
+        if ($minutes <= 0) {
             $this->setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
             $this->setHeader('Expires', '-1');
             $this->setHeader('Pragma', 'no-cache');
-        }
-        else {
+        } else {
             $this->setHeader('Expires', gmdate('D, d M Y H:i:s', time() + $minutes * 60) . ' GMT', true);
             $this->setHeader('Cache-Control', 'max-age=' . $minutes * 60, true);
             $this->setHeader('Pragma', 'public', true);

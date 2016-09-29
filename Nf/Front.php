@@ -378,7 +378,7 @@ class Front extends Singleton
                     $middleware->execute();
                 }
             }
-        }        
+        }
       
     }
     

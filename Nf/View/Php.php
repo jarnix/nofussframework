@@ -96,8 +96,8 @@ class Php extends View
         $this->_response->addBodyPart($this->fetch($name));
     }
 
-     public function fetch($name)
-     {
+    public function fetch($name)
+    {
         // ob_start, require du tpl, ob_get_contents et return
         extract($this->_vars);
         ob_start();
@@ -105,22 +105,22 @@ class Php extends View
         $content=ob_get_contents();
         ob_end_clean();
         return $content;
+    }
+
+
+    public function setBasePath($path)
+    {
+        $this->_templateDirectory = Registry::get('applicationPath') . '/application/' . Registry::get('version') . '/' . $path . '/views/';
+        $this->_configDirectory = Registry::get('applicationPath') . '/configs/' . Registry::get('version') . '/' . Registry::get('locale') . '/' . $path . '/';
+    }
+
+    public function configLoad($filepath, $section = null)
+    {
+        // lire le fichier ini, ajouter aux variables
+        $ini = Ini::parse($filepath);
+        foreach ($ini as $key => $value) {
+            $this->_vars[$key]=$value;
         }
 
-
-        public function setBasePath($path)
-        {
-            $this->_templateDirectory = Registry::get('applicationPath') . '/application/' . Registry::get('version') . '/' . $path . '/views/';
-            $this->_configDirectory = Registry::get('applicationPath') . '/configs/' . Registry::get('version') . '/' . Registry::get('locale') . '/' . $path . '/';
-        }
-
-        public function configLoad($filepath, $section = null)
-        {
-            // lire le fichier ini, ajouter aux variables
-            $ini = Ini::parse($filepath);
-            foreach ($ini as $key => $value) {
-                $this->_vars[$key]=$value;
-            }
-
-        }
+    }
 }

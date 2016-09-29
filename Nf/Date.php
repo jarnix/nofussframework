@@ -14,24 +14,26 @@ abstract class Date
             if (preg_match('/^(\\d{4})\\-(\\d{2})\\-(\\d{2})\\ (\\d{2}):(\\d{2}):(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/(\\d{4})\\-(\\d{2})\\-(\\d{2})\\ (\\d{2}):(\\d{2}):(\\d{2})/', '$3/$2/$1 $4:$5:$6', $matches[0]);
             } // sous la forme 2007-12-25 (date) => on renvoie une heure 00:00:00
-            elseif (preg_match('/^(\\d{4})\\-(\\d{2})\\-(\\d{2})$/', $date_origine, $matches))
+            elseif (preg_match('/^(\\d{4})\\-(\\d{2})\\-(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/(\\d{4})\\-(\\d{2})\\-(\\d{2})/', '$3/$2/$1 00:00:00', $matches[0]);
-            // sous la forme 25/12/2007 14:55:36
-            elseif (preg_match('/^(\\d{2})\/(\\d{2})\/(\\d{4}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date_origine, $matches))
+            } // sous la forme 25/12/2007 14:55:36
+            elseif (preg_match('/^(\\d{2})\/(\\d{2})\/(\\d{4}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = $date_origine;
-            // sous la forme 25/12/2007 14:55 => on ajoute :00
-            elseif (preg_match('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4}) (\\d{2}):(\\d{2})$/', $date_origine, $matches))
+            } // sous la forme 25/12/2007 14:55 => on ajoute :00
+            elseif (preg_match('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4}) (\\d{2}):(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4}) (\\d{2}):(\\d{2})$/', '$1/$2/$3 $4:$5:00', $matches[0]);
-            // sous la forme 25/12/2007 => on ajoute 00:00:00
-            elseif (preg_match('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4})$/', $date_origine, $matches))
+            } // sous la forme 25/12/2007 => on ajoute 00:00:00
+            elseif (preg_match('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4})$/', '$1/$2/$3 00:00:00', $matches[0]);
+            }
         } else {
             // sous la forme 2007-12-25 (qqch)?
             if (preg_match('/(\\d{4})\\-(\\d{2})\\-(\\d{2})/', $date_origine, $matches)) {
                 $date_output = preg_replace('/(\\d{4})\\-(\\d{2})\\-(\\d{2})/', '$3/$2/$1', $matches[0]);
             } // sous la forme 25/12/2007 => on ajoute 00:00:00
-            elseif (preg_match('/(\\d{1,2})\/(\\d{1,2})\/(\\d{4})/', $date_origine, $matches))
+            elseif (preg_match('/(\\d{1,2})\/(\\d{1,2})\/(\\d{4})/', $date_origine, $matches)) {
                 $date_output = preg_replace('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4})$/', '$1/$2/$3', $matches[0]);
+            }
         }
         if ($date_output!='') {
             return $date_output;
@@ -78,32 +80,34 @@ abstract class Date
             if (preg_match('/^(\\d{2})\/(\\d{2})\/(\\d{4}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/^(\\d{2})\/(\\d{2})\/(\\d{4}) (\\d{2}):(\\d{2}):(\\d{2})$/', '$3-$2-$1 $4:$5:$6', $matches[0]);
             } // sous la forme 25/12/2007 14:55 => on ajoute :00
-            elseif (preg_match('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4}) (\\d{2}):(\\d{2})$/', $date_origine, $matches))
+            elseif (preg_match('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4}) (\\d{2}):(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4}) (\\d{2}):(\\d{2})$/', '$3-$2-$1 $4:$5:00', $matches[0]);
-            // sous la forme 25/12/2007 => on ajoute 00:00:00
-            elseif (preg_match('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4})$/', $date_origine, $matches))
+            } // sous la forme 25/12/2007 => on ajoute 00:00:00
+            elseif (preg_match('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/^(\\d{1,2})\/(\\d{1,2})\/(\\d{4})$/', '$3-$2-$1 00:00:00', $matches[0]);
-            // sous la forme time() numérique
+            } // sous la forme time() numérique
             elseif (is_numeric($date_origine)) {
                 $date_output = date("Y-m-d H:i:s", $date_origine);
             } // sous la forme mysql datetime
-            elseif (preg_match('/^(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date_origine, $matches))
+            elseif (preg_match('/^(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})/', '$1-$2-$3 $4:$5:$6', $matches[0]);
-            // sous la forme mysql date
-            elseif (preg_match('/^(\\d{4})-(\\d{2})-(\\d{2})$/', $date_origine, $matches))
+            } // sous la forme mysql date
+            elseif (preg_match('/^(\\d{4})-(\\d{2})-(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/(\\d{4})-(\\d{2})-(\\d{2})/', '$1-$2-$3 00:00:00', $matches[0]);
+            }
         } else {
             if (preg_match('/(\\d{1,2})\/(\\d{1,2})\/(\\d{4})/', $date_origine, $matches)) {
                 $date_output = preg_replace('/(\\d{1,2})\/(\\d{1,2})\/(\\d{4})/', '$3-$2-$1', $matches[0]);
             } // sous la forme d'une timestamp numérique
-            elseif (is_numeric($date_origine))
+            elseif (is_numeric($date_origine)) {
                 $date_output = date("Y-m-d", $date_origine);
-            // sous la forme mysql datetime
-            elseif (preg_match('/^(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date_origine, $matches))
+            } // sous la forme mysql datetime
+            elseif (preg_match('/^(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})/', '$1-$2-$3', $matches[0]);
-            // sous la forme mysql date
-            elseif (preg_match('/^(\\d{4})-(\\d{2})-(\\d{2})$/', $date_origine, $matches))
+            } // sous la forme mysql date
+            elseif (preg_match('/^(\\d{4})-(\\d{2})-(\\d{2})$/', $date_origine, $matches)) {
                 $date_output = preg_replace('/(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2})/', '$1-$2-$3', $matches[0]);
+            }
         }
         if ($date_output!='') {
             return $date_output;
