@@ -9,7 +9,8 @@ use \Nf\Middleware\Pre;
 use \Nf\Front;
 use \Nf\Front\Request\Http;
 
-class Cors implements \Nf\Middleware\MiddlewareInterface {
+class Cors implements \Nf\Middleware\MiddlewareInterface
+{
     
     use Pre;
 
@@ -27,17 +28,18 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
     const DEFAULT_ALLOWED_HEADERS = 'authorization';
     const DEFAULT_MAX_AGE = 86400;
 
-    public function execute() {
+    public function execute()
+    {
         
         $settings = Settings::getInstance();
 
         // reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 
         // if CORS is enabled in the config+env settings
-        if(isset($settings->security->cors->enable)) {
-            if($settings->security->cors->enable) {
+        if (isset($settings->security->cors->enable)) {
+            if ($settings->security->cors->enable) {
                 $front = Front::getInstance();
-                if($front->getRequest() instanceof Http) {
+                if ($front->getRequest() instanceof Http) {
                     // is it a CORS preflight request ?
                     if (isset($_SERVER['HTTP_ORIGIN']) && isset($_SERVER['HTTP_HOST'])) {
                         $parsedOrigin = parse_url($_SERVER['HTTP_ORIGIN']);
@@ -45,52 +47,48 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
                         $parsedCurrent['host'] = $_SERVER['HTTP_HOST'];
                         $parsedCurrent['scheme'] = $_SERVER['REQUEST_SCHEME'];
                         $parsedCurrent['port'] = $_SERVER['SERVER_PORT'];
-                        if(!($parsedCurrent['host'] === $parsedOrigin['host'])
+                        if (!($parsedCurrent['host'] === $parsedOrigin['host'])
                             || ! ($parsedCurrent['port'] === $parsedOrigin['port'])
                             || ! ($parsedCurrent['scheme'] === $parsedOrigin['scheme'])
                         ) {
                             $corsAllowed = false;
                             // it's a CORS request
                             // origins
-                            if(isset($settings->security->cors->allowed_origins)) {
+                            if (isset($settings->security->cors->allowed_origins)) {
                                 $allowedOriginsFromSettings = $settings->security->cors->allowed_origins;
-                            }
-                            else {
+                            } else {
                                 $allowedOriginsFromSettings = self::DEFAULT_ALLOWED_ORIGINS;
                             }
-                            if($allowedOriginsFromSettings!='*') {
+                            if ($allowedOriginsFromSettings!='*') {
                                 $allowedOrigins = array_map('trim', explode(',', $settings->security->cors->allowed_origins));
-                                if(in_array($parsedCurrent['host'], $allowedOrigins)) {
+                                if (in_array($parsedCurrent['host'], $allowedOrigins)) {
                                     $corsAllowed = true;
                                 }
-                            }
-                            else {
+                            } else {
                                 $corsAllowed = true;
                             }
                             // methods
-                            if(isset($settings->security->cors->allowed_methods)) {
+                            if (isset($settings->security->cors->allowed_methods)) {
                                 $allowedMethodsFromSettings = $settings->security->cors->allowed_methods;
-                            }
-                            else {
+                            } else {
                                 $allowedMethodsFromSettings = self::DEFAULT_ALLOWED_METHODS;
                             }
                             $allowedMethods = array_map('strtoupper', array_map('trim', explode(',', $allowedMethodsFromSettings)));
-                            if(!in_array(strtoupper($front->getRequest()->getMethod()), $allowedMethods)) {
+                            if (!in_array(strtoupper($front->getRequest()->getMethod()), $allowedMethods)) {
                                 $corsAllowed = false;
                             }
                             // headers
-                            if(isset($settings->security->cors->allowed_headers)) {
+                            if (isset($settings->security->cors->allowed_headers)) {
                                 $allowedHeadersFromSettings = $settings->security->cors->allowed_headers;
-                            }
-                            else {
+                            } else {
                                 $allowedHeadersFromSettings = self::DEFAULT_ALLOWED_HEADERS;
                             }
                             $allowedHeaders = array_map('trim', explode(',', $allowedHeadersFromSettings));
                             // sending the response
-                            if($corsAllowed) {
+                            if ($corsAllowed) {
                                 header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-                                if($allowedOriginsFromSettings=='*') {
-                                    if(isset($_SERVER['HTTP_VARY'])) {
+                                if ($allowedOriginsFromSettings=='*') {
+                                    if (isset($_SERVER['HTTP_VARY'])) {
                                         $varyHeaders = array_map('trim', explode(',', $_SERVER['HTTP_VARY'])) ;
                                     }
                                     // adding the Vary: Origin for proxied requests
@@ -100,10 +98,9 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
                                 if ($front->getRequest()->isOptions()) {
                                     header('Access-Control-Allow-Methods: ' . implode(', ', $allowedMethods));
                                 }
-                                if(isset($settings->security->cors->allowed_credentials)) {
+                                if (isset($settings->security->cors->allowed_credentials)) {
                                     $allowedCredentialsFromSettings = $settings->security->cors->allowed_credentials;
-                                }
-                                else {
+                                } else {
                                     $allowedCredentialsFromSettings = self::DEFAULT_ALLOWED_CREDENTIALS;
                                 }
                                 if ($allowedCredentialsFromSettings) {
@@ -113,10 +110,9 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
                                     header('Access-Control-Allow-Headers: ' . implode(', ', $allowedHeaders));
                                 }
                                 // max-age
-                                if(isset($settings->security->cors->max_age)) {
+                                if (isset($settings->security->cors->max_age)) {
                                     $allowedMaxAgeFromSettings = $settings->security->cors->max_age;
-                                }
-                                else {
+                                } else {
                                     $allowedMaxAgeFromSettings = self::DEFAULT_MAX_AGE;
                                 }
                                 header('Access-Control-Max-Age: ' . $allowedMaxAgeFromSettings);
@@ -125,8 +121,7 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
                                     return false;
                                 }
                                 return true;
-                            }
-                            else {
+                            } else {
                                 return false;
                             }
                         }
@@ -137,6 +132,4 @@ class Cors implements \Nf\Middleware\MiddlewareInterface {
 
         return true;
     }
-
-
 }
