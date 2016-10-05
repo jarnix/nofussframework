@@ -101,7 +101,13 @@ class Router extends Singleton
                             if (isset($newRoute['regexp'])) {
                                 $newRoute['regexp'] = ltrim($newRoute['regexp'], '/');
                                 $newRoute['inheritableRegexp'] = $newRoute['regexp'];
-                                $newRoute['regexp'] = rtrim(ltrim($subPath . '/' . $newRoute['regexp'], '/'), '/');
+                                // special case for $ for answering to /something$ (setting something$ and not /something/$ as the regexp)
+                                if($newRoute['regexp'] == '$') {
+                                    $newRoute['regexp'] = rtrim(ltrim($subPath . $newRoute['regexp'], '/'), '/');
+                                }
+                                else {
+                                    $newRoute['regexp'] = rtrim(ltrim($subPath . '/' . $newRoute['regexp'], '/'), '/');
+                                }
                             }
                             if (isset($newRoute['name'])) {
                                 $this->allRoutesByVersionAndLocale[$version][$locale][$newRoute['name']] = $newRoute;
