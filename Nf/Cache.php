@@ -79,6 +79,9 @@ abstract class Cache
             } else {
                 $lifetime = self::DEFAULT_LIFETIME;
             }
+            if(empty($handler)) {
+                $handler = "null";
+            }
             $instance = self::factory($handler, $params, $lifetime);
             self::$instances[$type]=$instance;
         }
