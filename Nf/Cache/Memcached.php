@@ -12,7 +12,7 @@ class Memcached implements CacheInterface
     function __construct($params)
     {
         $this->_memcache = new \Memcache;
-        if(!isset($params->hosts)) {
+        if (!isset($params->hosts)) {
             throw new \Exception("No host was set in the settings for the Memcached connector");
         }
         if (strpos($params->hosts, ',')>0) {

@@ -102,10 +102,9 @@ class Router extends Singleton
                                 $newRoute['regexp'] = ltrim($newRoute['regexp'], '/');
                                 $newRoute['inheritableRegexp'] = $newRoute['regexp'];
                                 // special case for $ for answering to /something$ (setting something$ and not /something/$ as the regexp)
-                                if($newRoute['regexp'] == '$') {
+                                if ($newRoute['regexp'] == '$') {
                                     $newRoute['regexp'] = rtrim(ltrim($subPath . $newRoute['regexp'], '/'), '/');
-                                }
-                                else {
+                                } else {
                                     $newRoute['regexp'] = rtrim(ltrim($subPath . '/' . $newRoute['regexp'], '/'), '/');
                                 }
                             }
