@@ -130,15 +130,19 @@ abstract class AbstractResponse
                 $forOut = '';
                 $forOut = $k . ' = ';
                 if (is_array($v) || is_object($v)) {
-                    $strV = print_r($v, true);
-                    if (strlen($strV) > 50) {
-                        $strV = substr($strV, 0, 50) . '...';
+                    try {
+                        $strV = print_r($v, true);
+                        if (strlen($strV) > 50) {
+                            $strV = substr($strV, 0, 50) . '...';
+                        }
+                        $forReplace = [
+                            "\n",
+                            "\r"
+                        ];
+                        $forOut .= str_replace($forReplace, '', $strV);
+                    } catch (\Exception $e) {
+                        $forOut .= '? - Property access is not allowed yet';
                     }
-                    $forReplace = [
-                        "\n",
-                        "\r"
-                    ];
-                    $forOut .= str_replace($forReplace, '', $strV);
                 } else {
                     $forOut .= $v;
                 }
