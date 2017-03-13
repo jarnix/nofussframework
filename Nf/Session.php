@@ -25,10 +25,10 @@ abstract class Session extends Singleton
             } else {
                 $sessionHandler = self::factory('Nf\Session', $config->session->handler, $sessionParams, $config->session->lifetime);
             }
-            
+
             session_name($config->session->cookie->name);
             session_set_cookie_params(0, $config->session->cookie->path, $config->session->cookie->domain, false, true);
-            
+
             session_set_save_handler(array(
                 &$sessionHandler,
                 'open'
@@ -56,12 +56,16 @@ abstract class Session extends Singleton
         } else {
             return false;
         }
-        
+
     }
 
     public static function getData()
     {
-        return $_SESSION;
+        if (isset($_SESSION)) {
+            return $_SESSION;
+        } else {
+            return [];
+        }
     }
 
     public function __get($key)

@@ -399,6 +399,7 @@ class Bootstrap
             $front->addModuleDirectory('library', Registry::get('libraryPath') . '/php/application/' . Registry::get('version') . '/');
 
             $config = Registry::get('config');
+
             if (isset($config->session->handler)) {
                 $front->setSession(Session::start());
             }
