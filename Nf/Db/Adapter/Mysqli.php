@@ -13,19 +13,13 @@ class Mysqli extends AbstractAdapter
         if ($this->_connection) {
             return;
         }
-        
+
         if (! extension_loaded('mysqli')) {
             throw new \Exception('The Mysqli extension is required for this adapter but the extension is not loaded');
         }
-        
-        if (isset($this->_config['port'])) {
-            $port = (integer) $this->_config['port'];
-        } else {
-            $port = null;
-        }
-        
+
         $this->_connection = mysqli_init();
-        
+
         if (! empty($this->_config['driver_options'])) {
             foreach ($this->_config['driver_options'] as $option => $value) {
                 if (is_string($option)) {
@@ -39,20 +33,20 @@ class Mysqli extends AbstractAdapter
                 @mysqli_options($this->_connection, $option, $value);
             }
         }
-        
+
         // Suppress connection warnings here.
         // Throw an exception instead.
         try {
-            $_isConnected = mysqli_real_connect($this->_connection, $this->_config['hostname'], $this->_config['username'], $this->_config['password'], $this->_config['database'], $port);
+            $_isConnected = mysqli_real_connect($this->_connection, $this->_config['hostname'], $this->_config['username'], $this->_config['password'], $this->_config['database'], $this->_config['port']);
         } catch (Exception $e) {
             $_isConnected = false;
         }
-        
+
         if ($_isConnected === false || mysqli_connect_errno()) {
             $this->closeConnection();
             throw new \Exception(mysqli_connect_error());
         }
-        
+
         if ($_isConnected && ! empty($this->_config['charset'])) {
             mysqli_set_charset($this->_connection, $this->_config['charset']);
         }
@@ -107,10 +101,10 @@ class Mysqli extends AbstractAdapter
             }
             $sql .= " " . implode(', ', $insertFields);
         }
-        
+
         $res = new $this->_resourceClass($sql, $this);
         $res->execute();
-        
+
         return $this->getConnection()->affected_rows;
     }
 
@@ -122,10 +116,10 @@ class Mysqli extends AbstractAdapter
             $updateFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);
         }
         $sql .= " " . implode(', ', $updateFields);
-        
+
         $res = new $this->_resourceClass($sql, $this);
         $res->execute();
-        
+
         return $this->getConnection()->affected_rows;
     }
 
@@ -140,19 +134,19 @@ class Mysqli extends AbstractAdapter
             $updateFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);
         }
         $sql .= " " . implode(', ', $updateFields);
-        
+
         $sqlOnDuplicate = " ON DUPLICATE KEY UPDATE ";
         $onDuplicateFields = array();
         foreach ($bind as $key => $value) {
             $onDuplicateFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);
         }
         $sqlOnDuplicate .= " " . implode(', ', $onDuplicateFields);
-        
+
         $sql .= $sqlOnDuplicate;
-        
+
         $res = new $this->_resourceClass($sql, $this);
         $res->execute();
-        
+
         return $this->getConnection()->affected_rows;
     }
 
@@ -177,7 +171,7 @@ class Mysqli extends AbstractAdapter
         }
         $res = new $this->_resourceClass($sql, $this);
         $res->execute();
-        
+
         return $this->getConnection()->affected_rows;
     }
 
@@ -199,10 +193,10 @@ class Mysqli extends AbstractAdapter
         } else {
             $sql = "TRUNCATE TABLE" . $this->quoteIdentifier($tableName, true);
         }
-        
+
         $res = new $this->_resourceClass($sql, $this);
         $res->execute();
-        
+
         return $this->getConnection()->affected_rows;
     }
 
@@ -210,7 +204,7 @@ class Mysqli extends AbstractAdapter
     {
         $mysqli = $this->_connect();
         $mysqli = $this->_connection;
-        
+
         while ($mysqli->more_results()) {
             if ($mysqli->next_result()) {
                 $res = $mysqli->use_result();
@@ -225,13 +219,13 @@ class Mysqli extends AbstractAdapter
     {
         $mysqli = $this->_connect();
         $mysqli = $this->_connection;
-        
+
         if (is_array($queries)) {
             $queries = implode(';', $queries);
         }
-        
+
         $ret = $mysqli->multi_query($queries);
-        
+
         if ($ret === false) {
             throw new \Exception($mysqli->error);
         }
