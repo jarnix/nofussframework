@@ -167,7 +167,7 @@ class Mysqli extends AbstractAdapter
             foreach ($where as $key => $value) {
                 $whereFields[] = $this->quoteIdentifier($key) . "=" . $this->quote($value);
             }
-            $sql .= " WHERE " . implode(', ', $whereFields);
+            $sql .= " WHERE " . implode(' AND ', $whereFields);
         }
         $res = new $this->_resourceClass($sql, $this);
         $res->execute();
