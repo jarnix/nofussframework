@@ -4,6 +4,8 @@ namespace Nf\Error;
 class Handler extends \Exception
 {
 
+    private static $memoryBuffer;
+
     static $lastError = array(
         'type' => 'error',
         'httpCode' => 0,
@@ -29,7 +31,7 @@ class Handler extends \Exception
         }
         // Restore the built-in error handler.
         restore_error_handler();
-        
+
         // Restore the built-in exception handler.
         restore_exception_handler();
     }
@@ -51,15 +53,15 @@ class Handler extends \Exception
     {
         self::$lastError['httpCode'] = 500;
         self::$lastError['message'] = $exception->getMessage();
-        
+
         if (method_exists($exception, 'getHttpStatus')) {
             self::$lastError['httpCode'] = $exception->getHttpStatus();
         }
-        
+
         if (method_exists($exception, 'getErrors')) {
             self::$lastError['message'] = $exception->getErrors();
         }
-        
+
         self::disableErrorHandler();
         self::$lastError['type'] = 'exception';
         self::$lastError['fullException'] = $exception;
@@ -67,12 +69,13 @@ class Handler extends \Exception
         self::$lastError['file'] = $exception->getFile();
         self::$lastError['line'] = $exception->getLine();
         self::$lastError['trace'] = $exception->getTraceAsString();
-        
+
         return self::displayAndLogError($exception);
     }
 
     public static function handleFatal()
     {
+        self::$memoryBuffer = null;
         self::disableErrorHandler();
         $last = error_get_last();
         if ($last != null) {
@@ -106,7 +109,7 @@ class Handler extends \Exception
         self::$lastError['file'] = '';
         self::$lastError['line'] = 0;
         self::$lastError['trace'] = '';
-        
+
         if (\Nf\Registry::isRegistered('config')) {
             $config = \Nf\Registry::get('config');
             $front = \Nf\Front::getInstance();
@@ -120,9 +123,9 @@ class Handler extends \Exception
                 $response->sendHeaders();
             } catch (Exception $e) {
             }
-            
+
             $configName = strtolower($type);
-            
+
             if (isset($config->error->displayMethod)) {
                 if ($config->error->displayMethod == 'forward') {
                     // forward
@@ -141,12 +144,12 @@ class Handler extends \Exception
     public static function displayAndLogError($exception = null)
     {
         $err = self::getLastError();
-        
+
         if (\Nf\Registry::isRegistered('config')) {
             $config = \Nf\Registry::get('config');
             $front = \Nf\Front::getInstance();
             $response = $front->getResponse();
-            
+
             // optional error logging
             if ((isset($exception->doLog) && $exception->doLog || ! isset($exception->doLog))) {
                 if (isset($config->error->logger->class) && strtolower($config->error->logger->class) != 'syslog') {
@@ -160,7 +163,7 @@ class Handler extends \Exception
                     }
                 }
             }
-            
+
             if (isset($response)) {
                 if ($response->isBinary()) {
                     $response->setContentType('html');
@@ -174,7 +177,7 @@ class Handler extends \Exception
                     $response->sendHeaders();
                 } catch (Exception $e) {
                 }
-                
+
                 if (isset($config->error->displayMethod)) {
                     if ($config->error->displayMethod == 'forward') {
                         // forward
@@ -218,6 +221,7 @@ class Handler extends \Exception
             'Nf\Error\Handler',
             'handleException'
         ));
+        self::$memoryBuffer = str_repeat('*', 1024 * 1024);
         register_shutdown_function(array(
             'Nf\Error\Handler',
             'handleFatal'
