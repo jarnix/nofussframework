@@ -45,7 +45,10 @@ class Cors implements \Nf\Middleware\MiddlewareInterface
                         $parsedOrigin = parse_url($_SERVER['HTTP_ORIGIN']);
                         $parsedCurrent = [];
                         $parsedCurrent['host'] = $_SERVER['HTTP_HOST'];
-                        $parsedCurrent['scheme'] = $_SERVER['REQUEST_SCHEME'];
+                        $parsedCurrent['scheme'] = isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] : false;
+                        if (!$parsedCurrent['scheme']) {
+                            $parsedCurrent['scheme'] = (isset($_SERVER['HTTP_SSL']) && $_SERVER['HTTP_SSL'] == 'on') ? 'https' : 'http';
+                        }
                         $parsedCurrent['port'] = $_SERVER['SERVER_PORT'];
                         if (!($parsedCurrent['host'] === $parsedOrigin['host'])
                             || ! ($parsedCurrent['port'] === $parsedOrigin['port'])
