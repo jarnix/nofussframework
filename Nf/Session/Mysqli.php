@@ -25,7 +25,7 @@ class Mysqli extends Session
 
     function open($savePath, $sessionName)
     {
-        
+        return true;
     }
 
     function close()

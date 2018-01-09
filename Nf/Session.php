@@ -50,7 +50,6 @@ abstract class Session extends Singleton
             ));
             register_shutdown_function('session_write_close');
             session_start();
-            // session_regenerate_id(true);
             Registry::set('session', $sessionHandler);
             return $sessionHandler;
         } else {
