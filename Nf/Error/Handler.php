@@ -21,9 +21,13 @@ class Handler extends \Exception
         return self::$lastError;
     }
 
+    public static function voidErrorHandle($errno, $errstr) {
+        return false;
+    }
+
     public static function disableErrorHandler()
     {
-        while (set_error_handler(create_function('$errno,$errstr', 'return false;'))) {
+        while (set_error_handler('self::voidErrorHandle')) {
             // Unset the error handler we just set.
             restore_error_handler();
             // Unset the previous error handler.
