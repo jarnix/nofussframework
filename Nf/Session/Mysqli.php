@@ -43,6 +43,9 @@ class Mysqli extends Session
                 $row=$res->fetch();
                 return $row['data'];
             }
+            else {
+                return '';
+            }
         }
     }
 
